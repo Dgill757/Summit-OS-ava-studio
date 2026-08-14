@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Jarvis — The Complete Build (Windows)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070B14; --bg-2:#0A1020; --panel:#0E1626; --panel-2:#111C30;
+    --line:#1B2942; --line-bright:#26405f;
+    --cyan:#3BE8FF; --cyan-dim:#1d9fb8; --amber:#FFB020; --green:#41F5A0; --red:#FF6B6B;
+    --text:#E7EEFA; --muted:#8DA0BF; --muted-2:#5F718F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.68;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(1200px 700px at 80% -8%, rgba(59,232,255,.10), transparent 60%),
+      radial-gradient(900px 600px at 6% 10%, rgba(255,176,32,.06), transparent 55%),
+      linear-gradient(transparent 96%, rgba(59,232,255,.045) 96%) 0 0/100% 34px,
+      linear-gradient(90deg, transparent 96%, rgba(59,232,255,.045) 96%) 0 0/34px 100%;}
+  /* moving scanline */
+  body::after{content:"";position:fixed;left:0;right:0;height:140px;z-index:0;pointer-events:none;
+    background:linear-gradient(180deg,transparent,rgba(59,232,255,.05),transparent);
+    animation:scan 9s linear infinite}
+  @keyframes scan{0%{top:-160px}100%{top:100%}}
+
+  .wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 22px}
+
+  h1,h2,h3,h4,.dsp{font-family:'Chakra Petch',sans-serif;letter-spacing:.5px}
+  .mono{font-family:'JetBrains Mono',monospace}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--cyan);display:inline-flex;align-items:center;gap:10px}
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--cyan);opacity:.7}
+
+  /* reactor orb (reused, scalable) */
+  .reactor{position:relative;width:220px;height:220px;display:grid;place-items:center}
+  .reactor .core{position:absolute;width:60px;height:60px;border-radius:50%;
+    background:radial-gradient(circle at 50% 45%, #eafffb 0%, var(--cyan) 38%, var(--cyan-dim) 70%, transparent 72%);
+    box-shadow:0 0 40px 8px rgba(59,232,255,.65),0 0 90px 22px rgba(59,232,255,.28);animation:pulse 3.4s ease-in-out infinite}
+  .ring{position:absolute;border-radius:50%;border:1px solid rgba(59,232,255,.35)}
+  .ring.r1{width:104px;height:104px;border-style:dashed;animation:spin 14s linear infinite}
+  .ring.r2{width:150px;height:150px;border-color:rgba(59,232,255,.22);animation:spin 22s linear infinite reverse}
+  .ring.r3{width:196px;height:196px;border-color:rgba(255,176,32,.20);border-top-color:rgba(255,176,32,.6);animation:spin 30s linear infinite}
+  .ring.r4{width:220px;height:220px;border-color:rgba(59,232,255,.10)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.86}}
+
+  /* HERO */
+  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:70px 22px 46px}
+  .hero h1{font-size:clamp(2.5rem,8vw,5rem);font-weight:700;line-height:.98;margin:16px 0 4px}
+  .hero h1 .glow{color:var(--cyan);text-shadow:0 0 26px rgba(59,232,255,.55)}
+  .hero .sub{color:var(--muted);max-width:640px;margin:12px auto 0;font-size:1.02rem}
+  .typed{font-family:'JetBrains Mono',monospace;color:var(--amber);font-size:.86rem;margin-top:26px;min-height:1.4em;letter-spacing:.06em}
+  .typed .cur{color:var(--cyan);animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .status-bar{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted)}
+  .chip{border:1px solid var(--line-bright);border-radius:999px;padding:6px 13px;background:rgba(14,22,38,.6);display:inline-flex;gap:8px;align-items:center}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  .dot.amber{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+  .dot.cyan{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+  .scrollcue{margin-top:42px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted-2);letter-spacing:.2em;animation:bob 2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0);opacity:.6}50%{transform:translateY(6px);opacity:1}}
+
+  /* section */
+  .section{padding:70px 0;border-top:1px solid var(--line)}
+  .section-head{display:flex;align-items:center;gap:18px;margin-bottom:6px}
+  .mini-reactor{width:46px;height:46px;flex:none;position:relative;display:grid;place-items:center}
+  .mini-reactor .mc{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#eafffb,var(--cyan) 60%,transparent);box-shadow:0 0 12px var(--cyan)}
+  .mini-reactor .mr{position:absolute;width:38px;height:38px;border-radius:50%;border:1px solid rgba(59,232,255,.4);border-top-color:var(--amber);animation:spin 8s linear infinite}
+  .section h2{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;margin:6px 0 10px;line-height:1.06}
+  .section .lede{color:var(--muted);max-width:740px;font-size:1.04rem;margin-bottom:6px}
+  .section h3{font-size:1.18rem;margin:30px 0 10px;color:var(--text);display:flex;align-items:center;gap:10px}
+  .section h3 .tagn{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--cyan);border:1px solid var(--line-bright);border-radius:6px;padding:2px 7px}
+  .section h4{font-size:1.05rem;margin:20px 0 6px}
+  p.body{color:var(--muted);margin:8px 0}
+  p.body b, li b{color:var(--text)}
+  a{color:var(--cyan);text-decoration:none;border-bottom:1px dotted rgba(59,232,255,.5)}
+  a:hover{border-bottom-style:solid}
+
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  .panel{position:relative;background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--line);border-radius:14px;padding:22px}
+  .panel::before,.panel::after{content:"";position:absolute;width:14px;height:14px;border:2px solid var(--cyan);opacity:.5}
+  .panel::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+  .panel::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:820px){.g2,.g3{grid-template-columns:1fr}}
+
+  /* numbered steps */
+  ol.steps{list-style:none;counter-reset:s;display:grid;gap:14px;margin-top:12px}
+  ol.steps>li{counter-increment:s;position:relative;padding:16px 18px 16px 60px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+  ol.steps>li::before{content:counter(s,decimal-leading-zero);position:absolute;left:16px;top:14px;font-family:'Chakra Petch',sans-serif;font-weight:700;color:var(--cyan);font-size:1.1rem;text-shadow:0 0 12px rgba(59,232,255,.4)}
+  ol.steps>li h4{margin:0 0 6px;font-size:1.04rem}
+  ol.steps>li p{color:var(--muted);font-size:.94rem;margin:4px 0}
+  ol.steps ul{margin:8px 0 0 0;padding-left:18px;color:var(--muted);font-size:.9rem}
+  ol.steps ul li{margin:3px 0}
+
+  /* command line block with label */
+  .cmd{margin:10px 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#060B15}
+  .cmd .bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#0b1220;border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+  .cmd .bar .d{width:9px;height:9px;border-radius:50%}
+  .cmd .bar .r{background:#ff5f56}.cmd .bar .y{background:#ffbd2e}.cmd .bar .g{background:#27c93f}
+  .cmd .bar .lbl{margin-left:8px}
+  .cmd pre{margin:0;border:0;border-radius:0;background:transparent}
+  pre{background:#060B15;border:1px solid var(--line);border-radius:10px;padding:15px 16px;overflow:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.62;color:#cfe6ff;white-space:pre}
+  pre .c{color:#5f718f}.pre .k,pre .k{color:var(--amber)}pre .s{color:var(--green)}pre .p{color:#7fb0ff}
+  code{font-family:'JetBrains Mono',monospace;background:rgba(59,232,255,.09);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:.85em;color:#bfe9ff;white-space:nowrap}
+
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:16px 0;font-size:.93rem}
+  .note.cyan{border-left-color:var(--cyan);background:rgba(59,232,255,.06)}
+  .note.red{border-left-color:var(--red);background:rgba(255,107,107,.07)}
+  .note.green{border-left-color:var(--green);background:rgba(65,245,160,.06)}
+  .note b{color:var(--amber)}.note.cyan b{color:var(--cyan)}.note.red b{color:var(--red)}.note.green b{color:var(--green)}
+
+  ul.clean{list-style:none;padding:0;display:grid;gap:9px;margin:8px 0}
+  ul.clean li{padding-left:26px;position:relative;color:var(--muted);font-size:.95rem}
+  ul.clean li::before{content:"▸";position:absolute;left:6px;color:var(--cyan)}
+
+  .kv{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+  .kv .cell{flex:1;min-width:140px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .kv .cell .l{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .kv .cell .v{font-family:'Chakra Petch',sans-serif;font-size:1.3rem;color:var(--cyan);margin-top:2px}
+  .kv .cell .v.amber{color:var(--amber)}.kv .cell .v.green{color:var(--green)}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem}
+  table.tbl th,table.tbl td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+  table.tbl td{color:var(--muted)}table.tbl td b{color:var(--text)}
+
+  .badge{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.1em;padding:3px 8px;border-radius:6px;text-transform:uppercase;font-weight:700;white-space:nowrap}
+  .b-use{background:rgba(65,245,160,.12);color:var(--green);border:1px solid rgba(65,245,160,.35)}
+  .b-opt{background:rgba(255,176,32,.12);color:var(--amber);border:1px solid rgba(255,176,32,.35)}
+  .b-skip{background:rgba(255,107,107,.10);color:var(--red);border:1px solid rgba(255,107,107,.30)}
+  .b-core{background:rgba(59,232,255,.14);color:var(--cyan);border:1px solid rgba(59,232,255,.4)}
+
+  .toc{columns:2;gap:22px;margin-top:14px}
+  @media(max-width:640px){.toc{columns:1}}
+  .toc a{display:block;padding:7px 0;font-family:'JetBrains Mono',monospace;font-size:.82rem;border-bottom:1px dashed var(--line);border-bottom-width:0}
+  .toc a span{color:var(--muted-2);margin-right:10px}
+
+  .prompt-box{border:1px dashed var(--cyan);border-radius:12px;background:rgba(59,232,255,.05);padding:16px 18px;margin:14px 0}
+  .prompt-box .plabel{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
+  .prompt-box p{color:var(--text);font-size:.92rem;font-style:italic}
+
+  footer{border-top:1px solid var(--line);padding:26px 0;text-align:center;color:var(--muted-2);font-family:'JetBrains Mono',monospace;font-size:.72rem}
+
+  @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="reactor" aria-hidden="true">
+    <div class="ring r4"></div><div class="ring r3"></div><div class="ring r2"></div><div class="ring r1"></div><div class="core"></div>
+  </div>
+  <div class="eyebrow">The Complete Build · Windows · Zero Experience Required</div>
+  <h1>PROJECT <span class="glow">JARVIS</span></h1>
+  <p class="sub">Every step. Every command. Every click. Every file. Follow it top to bottom and you will have an AI operator you can talk to, text, and phone from anywhere on Earth. If a 12-year-old can read, they can build this.</p>
+  <div class="typed"><span id="typed"></span><span class="cur">▋</span></div>
+  <div class="status-bar">
+    <span class="chip"><span class="dot"></span>10 PARTS</span>
+    <span class="chip"><span class="dot cyan"></span>ALL CODE INCLUDED</span>
+    <span class="chip"><span class="dot amber"></span>~$0 TO START</span>
+  </div>
+  <div class="scrollcue">▼ BEGIN INITIALIZATION</div>
+</header>
+
+<div class="wrap">
+
+<!-- TABLE OF CONTENTS -->
+<section class="section reveal" style="border-top:0">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Mission map</div></div>
+  </div>
+  <h2>The 10 parts of the build</h2>
+  <p class="lede">Do them in order. Each part ends with a test so you always know it worked before moving on. Total hands-on time for a beginner: one focused weekend for Parts 0–5, then an evening each for 6–10.</p>
+  <div class="toc">
+    <a href="#p0"><span>00</span>Orientation — the words you need to know</a>
+    <a href="#p1"><span>01</span>Install the foundation software</a>
+    <a href="#p2"><span>02</span>Get your API keys (the passwords)</a>
+    <a href="#p3"><span>03</span>Set up Obsidian — Jarvis's memory</a>
+    <a href="#p4"><span>04</span>Create the project + master brain file</a>
+    <a href="#p5"><span>05</span>Build Stage 1 — brain, voice &amp; the orb</a>
+    <a href="#p6"><span>06</span>Build Stage 2 — the hands (MCP tools)</a>
+    <a href="#p7"><span>07</span>Build Stage 3 — text it &amp; call it</a>
+    <a href="#p8"><span>08</span>Build Stage 4 — connect Summit OS</a>
+    <a href="#p9"><span>09</span>Build Stage 5 — install the skills brain</a>
+    <a href="#p10"><span>10</span>Daily use, guardrails &amp; troubleshooting</a>
+  </div>
+</section>
+
+<!-- PART 0 -->
+<section class="section reveal" id="p0">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Part 00</div></div>
+  </div>
+  <h2>Orientation — don't skip this</h2>
+  <p class="lede">If you've never touched code, read this once. It's the whole vocabulary you need. Ten minutes here saves you an hour of confusion later.</p>
+
+  <h3><span class="tagn">TERM</span>The words</h3>
+  <table class="tbl">
+    <tr><th>Word</th><th>What it actually means</th></tr>
+    <tr><td><b>PowerShell / Terminal</b></td><td>A black text window where you type commands instead of clicking. On Windows it's called <b>PowerShell</b>. This is where most of the magic happens.</td></tr>
+    <tr><td><b>Command</b></td><td>A line of text you type (or paste) into PowerShell, then press <b>Enter</b> to run it. Example: <code>node -v</code></td></tr>
+    <tr><td><b>Paste into PowerShell</b></td><td>Copy the text, click inside the PowerShell window, then <b>right-click</b> (right-click = paste there). Press Enter.</td></tr>
+    <tr><td><b>File</b></td><td>A single document on your computer, like <code>CLAUDE.md</code>. It has a name and an ending (<code>.md</code>, <code>.py</code>, <code>.env</code>).</td></tr>
+    <tr><td><b>Folder</b></td><td>A container that holds files. We'll make one called <code>Jarvis</code>.</td></tr>
+    <tr><td><b>API key</b></td><td>A long secret password that lets your Jarvis use a company's service (like Claude's brain or a voice). Treat every key like a credit card number.</td></tr>
+    <tr><td><b>Install</b></td><td>Download and set up a program so your computer can use it. Usually one command or one installer file.</td></tr>
+    <tr><td><b>MCP server</b></td><td>A "plug-in" that gives Jarvis a new ability — reading your vault, driving a browser, etc. You'll add these with a small config file.</td></tr>
+    <tr><td><b>Skill</b></td><td>A saved instruction pack that makes Jarvis better at one thing (designing UIs, reviewing code). You install these into its "brain."</td></tr>
+    <tr><td><b>Claude Code</b></td><td>The AI coding assistant that will actually build Jarvis for you. You talk to it in plain English and it writes the code.</td></tr>
+  </table>
+
+  <h3><span class="tagn">HOW</span>How to open PowerShell (you'll do this a lot)</h3>
+  <ol class="steps">
+    <li><h4>Press the Windows key</h4><p>Bottom-left of your keyboard, the little window flag.</p></li>
+    <li><h4>Type <code>powershell</code></h4><p>Just start typing the word. "Windows PowerShell" appears at the top.</p></li>
+    <li><h4>Click "Run as administrator" the first few times</h4><p>Right-click "Windows PowerShell" → <b>Run as administrator</b> → click <b>Yes</b>. This gives it permission to install things. After setup you can open it normally.</p></li>
+  </ol>
+
+  <div class="note cyan"><b>The one habit that makes this easy:</b> when this guide shows a command box, copy the whole thing, right-click into PowerShell to paste, press Enter, and <b>wait</b> until the text stops scrolling and you get a fresh line before doing the next one. Never rush two commands together.</div>
+
+  <div class="note red"><b>Golden safety rules — memorize these:</b> (1) Never paste an API key into a website, chat, or anywhere public. (2) Jarvis will always ask before it sends an email, spends money, or posts anything — never remove that confirmation. (3) If a command errors, don't panic — copy the red text, paste it to Claude Code, and ask "what does this mean and how do I fix it?"</div>
+</section>
+
+<!-- PART 1 -->
+<section class="section reveal" id="p1">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Part 01</div></div>
+  </div>
+  <h2>Install the foundation software</h2>
+  <p class="lede">Eight programs. Install them in this order. After each one there's a verify command — run it, and if it prints a version number, that piece is done.</p>
+
+  <h3><span class="tagn">1 of 8</span>Google Chrome</h3>
+  <p class="body">Jarvis's voice input needs Chrome specifically (not Edge, Safari, or Firefox). Go to <a href="https://www.google.com/chrome" target="_blank">google.com/chrome</a> → click <b>Download Chrome</b> → open the downloaded file → follow the installer.</p>
+
+  <h3><span class="tagn">2 of 8</span>Node.js (this gives you <code>npm</code>)</h3>
+  <p class="body">Go to <a href="https://nodejs.org" target="_blank">nodejs.org</a> → click the big button that says <b>LTS</b> (Long Term Support) → open the downloaded <code>.msi</code> file → click Next / Next / Install, accept the license, leave every default checked. When it asks about "Tools for Native Modules," you can leave it unchecked.</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — verify Node installed</span></div><pre>node -v
+npm -v</pre></div>
+  <p class="body">If you see two version numbers (like <code>v22.3.0</code> and <code>10.8.1</code>), you're good. If it says "not recognized," close PowerShell, open it again, and retry.</p>
+
+  <h3><span class="tagn">3 of 8</span>Python 3.12+</h3>
+  <p class="body">Go to <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads</a> → click <b>Download Python 3.12</b> (or newer). <b style="color:var(--amber)">CRUCIAL:</b> on the very first installer screen, check the box at the bottom that says <b>"Add python.exe to PATH"</b> before clicking Install. Miss this and nothing works later.</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — verify Python</span></div><pre>python --version
+pip --version</pre></div>
+
+  <h3><span class="tagn">4 of 8</span>Git</h3>
+  <p class="body">Git downloads code projects ("repos") from the internet. Go to <a href="https://git-scm.com/download/win" target="_blank">git-scm.com/download/win</a> → the download starts automatically → open the file → click Next through every screen (all defaults are fine).</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — verify Git</span></div><pre>git --version</pre></div>
+
+  <h3><span class="tagn">5 of 8</span>Visual Studio Code (your editor)</h3>
+  <p class="body">This is where you'll create and view files. Go to <a href="https://code.visualstudio.com" target="_blank">code.visualstudio.com</a> → <b>Download for Windows</b> → open the file → <b>accept the agreement</b> → on the "Select Additional Tasks" screen, check <b>"Add to PATH"</b> and both "Open with Code" boxes → Install.</p>
+  <p class="body">Then open VS Code and install two extensions: click the squares icon on the left (Extensions), search <b>"Python"</b> (by Microsoft) → Install, then search <b>"Claude Code"</b> → Install.</p>
+
+  <h3><span class="tagn">6 of 8</span>Claude Code (the builder)</h3>
+  <p class="body">This is the AI that builds Jarvis. Install it with one command, then sign in.</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — install Claude Code</span></div><pre>npm install -g @anthropic-ai/claude-code</pre></div>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — sign in</span></div><pre>claude</pre></div>
+  <p class="body">The first time you run <code>claude</code>, it opens your browser to log in. Sign in with your Anthropic account (make one at <a href="https://claude.ai" target="_blank">claude.ai</a> if you haven't). Once it says you're connected, type <code>/exit</code> and press Enter to close it for now.</p>
+  <div class="note"><b>If <code>npm install -g</code> gives a permissions error:</b> run this once, then retry the install command above: <code>npm config set prefix "$env:APPDATA\npm"</code></div>
+
+  <h3><span class="tagn">7 of 8</span>Codex (optional second engine)</h3>
+  <p class="body">Codex is a second AI coding engine Jarvis can route heavy jobs to. It's optional for Stage 1 — you can skip it now and add it later. If you want it, install the Codex CLI per its official docs and sign in the same way. Everything in this guide works with just Claude Code.</p>
+
+  <h3><span class="tagn">8 of 8</span>Obsidian (the memory app)</h3>
+  <p class="body">Go to <a href="https://obsidian.md" target="_blank">obsidian.md</a> → <b>Download</b> → open the file → it installs itself. Don't create a vault yet — we do that carefully in Part 3.</p>
+
+  <div class="note green"><b>✅ Part 1 test:</b> open a fresh PowerShell and run these four — every one should print a version. If so, your foundation is complete.<br><br><code>node -v</code> &nbsp; <code>python --version</code> &nbsp; <code>git --version</code> &nbsp; <code>claude --version</code></div>
+</section>
+
+<!-- PART 2 -->
+<section class="section reveal" id="p2">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Part 02</div></div>
+  </div>
+  <h2>Get your API keys</h2>
+  <p class="lede">Keys are passwords that let Jarvis use outside services. You need three to start. Two are free. Open a blank note in Notepad and paste each key in as you get it — you'll need them all in Part 5.</p>
+
+  <div class="note red"><b>Before you begin:</b> a key is like a credit card number. Never put one in a website form, a screenshot, a public GitHub repo, or a chat message. They only ever go in one place: your <code>.env</code> file on your own computer.</div>
+
+  <h3><span class="tagn">KEY 1</span>Anthropic — the brain <span class="badge b-core" style="margin-left:6px">Required</span></h3>
+  <ol class="steps">
+    <li><h4>Go to <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></h4><p>Sign in with the same account you use for Claude.</p></li>
+    <li><h4>Add credits first</h4><p>Click <b>Billing</b> in the left sidebar → <b>Add credits</b>. Put in $20 to start and turn on <b>Auto-reload</b> so Jarvis never dies mid-sentence.</p></li>
+    <li><h4>Create the key</h4><p>Left sidebar → <b>API Keys</b> → <b>Create Key</b> → name it <code>jarvis</code> → <b>Create</b>.</p></li>
+    <li><h4>Copy it immediately</h4><p>It starts with <code>sk-ant-</code>. You can only see it once — paste it into your Notepad now. If you lose it, just delete it and make a new one.</p></li>
+  </ol>
+  <div class="note"><b>Cost reality:</b> expect roughly $5–20/month for normal personal use. Heavy building days cost more. The auto-reload cap is your safety net — set it to something you're comfortable with.</div>
+
+  <h3><span class="tagn">KEY 2</span>Groq — the ears (speech to text) <span class="badge b-use" style="margin-left:6px">Free</span></h3>
+  <ol class="steps">
+    <li><h4>Go to <a href="https://console.groq.com" target="_blank">console.groq.com</a></h4><p>Create a free account (Google sign-in is fastest).</p></li>
+    <li><h4>Left sidebar → API Keys → Create API Key</h4><p>Name it <code>jarvis</code> → Submit.</p></li>
+    <li><h4>Copy it</h4><p>Starts with <code>gsk_</code>. Paste into Notepad.</p></li>
+  </ol>
+  <p class="body">Groq runs Whisper (the transcription model) extremely fast and gives you a generous free tier — this is what turns your voice into text for Jarvis.</p>
+
+  <h3><span class="tagn">KEY 3</span>ElevenLabs — the voice <span class="badge b-use" style="margin-left:6px">Free tier</span></h3>
+  <ol class="steps">
+    <li><h4>Go to <a href="https://elevenlabs.io" target="_blank">elevenlabs.io</a></h4><p>Create a free account.</p></li>
+    <li><h4>Click your profile icon (bottom-left) → API Keys</h4><p>Create a key and copy it into Notepad.</p></li>
+    <li><h4>Pick your Jarvis voice</h4><p>Go to the <b>Voices</b> library and find a calm British male voice. Click it, then copy its <b>Voice ID</b> (a long string of letters/numbers) into Notepad too — labeled <code>ELEVENLABS_VOICE_ID</code>.</p></li>
+  </ol>
+  <div class="note"><b>Free tier is ~10,000 characters/month</b> — enough to test properly. If you fall in love with it, the $5/month tier is plenty for daily personal use.</div>
+
+  <h3><span class="tagn">LATER</span>Keys you'll get in Part 7 (skip for now)</h3>
+  <ul class="clean">
+    <li><b>Telegram Bot Token</b> — free, for texting Jarvis. We create it in Part 7.</li>
+    <li><b>Twilio SID + Auth Token + phone number</b> — ~$1/month + usage, for calling Jarvis. Part 7.</li>
+  </ul>
+
+  <div class="note green"><b>✅ Part 2 test:</b> your Notepad should now have 4 lines — Anthropic key, Groq key, ElevenLabs key, ElevenLabs voice ID. Save that Notepad file somewhere private on your own machine (not a shared drive).</div>
+</section>
+
+<!-- PART 3 -->
+<section class="section reveal" id="p3">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Part 03</div></div>
+  </div>
+  <h2>Set up Obsidian — Jarvis's memory</h2>
+  <p class="lede">Obsidian is just a folder of plain text files with a nice app on top. That's exactly why it's perfect for memory: Jarvis can read and write it directly, you can read it too, and it's yours forever with no lock-in.</p>
+
+  <h3><span class="tagn">3.1</span>Create the vault</h3>
+  <ol class="steps">
+    <li><h4>Open Obsidian</h4><p>You'll see a welcome screen with a few options.</p></li>
+    <li><h4>Click "Create new vault"</h4><p>It's the first option under "Vaults."</p></li>
+    <li><h4>Name it <code>JarvisVault</code></h4><p>Type exactly that name.</p></li>
+    <li><h4>Set the location</h4><p>Click <b>Browse</b> and choose <code>C:\Users\DanGi</code>. The final path will be <code>C:\Users\DanGi\JarvisVault</code>. Click <b>Create</b>.</p></li>
+  </ol>
+  <div class="note cyan"><b>Using a different Windows username?</b> Everywhere this guide says <code>C:\Users\DanGi</code>, swap in your own. To find it, run <code>echo $env:USERPROFILE</code> in PowerShell — whatever it prints is your home folder.</div>
+
+  <h3><span class="tagn">3.2</span>Build the folder structure</h3>
+  <p class="body">This structure is the shape of Jarvis's mind. Rather than clicking 12 times, create it in one command.</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — create the vault skeleton</span></div><pre>cd $env:USERPROFILE\JarvisVault
+mkdir Jarvis, Jarvis\memory, Jarvis\knowledge, Jarvis\logs, Summit, Projects, Daily</pre></div>
+  <p class="body">Switch back to Obsidian and you'll see the folders appear instantly in the left sidebar. Here's what each one is for:</p>
+  <table class="tbl">
+    <tr><th>Folder</th><th>What lives here</th></tr>
+    <tr><td><b>Jarvis/</b></td><td>Identity and rules — who Jarvis is and what it's allowed to do.</td></tr>
+    <tr><td><b>Jarvis/memory/</b></td><td>Facts it remembers about you. "The deploy is Friday." Written automatically.</td></tr>
+    <tr><td><b>Jarvis/knowledge/</b></td><td>Reference material you feed it — your Sales Playbook, repo notes, research.</td></tr>
+    <tr><td><b>Jarvis/logs/</b></td><td>A record of every action it took. Your audit trail.</td></tr>
+    <tr><td><b>Summit/</b></td><td>Business context — clients, offers, revenue math, playbooks.</td></tr>
+    <tr><td><b>Projects/</b></td><td>Active builds and their status.</td></tr>
+    <tr><td><b>Daily/</b></td><td>Daily notes — what happened, what's next.</td></tr>
+  </table>
+
+  <h3><span class="tagn">3.3</span>Create the identity file</h3>
+  <p class="body">In Obsidian, click the <b>Jarvis</b> folder, then the <b>new note</b> icon (page with a +) at the top of the sidebar. Name it <code>identity</code>. Paste this in:</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">JarvisVault\Jarvis\identity.md</span></div><pre><span class="c"># JARVIS — Identity</span>
+
+<span class="k">## Who I am</span>
+I am JARVIS, Dan Gill's personal AI operator.
+Calm, dry British wit. Decisive. I do not pad my answers.
+I say "sir" occasionally, not constantly.
+
+<span class="k">## Who Dan is</span>
+Solo founder, Summit Voice AI (voice AI for roofing contractors) and QualifyOS.
+~10 years roofing industry experience. Based in Maryland.
+He closes sales calls. Everything else should run without him.
+
+<span class="k">## How I answer</span>
+- Short by default. Detail only when asked.
+- Direct, no fluff, no salesy language.
+- Short sentences, line breaks between them.
+- No em dashes. Use ellipses instead.
+- Lowercase email subject lines. Sentence case everywhere else.
+
+<span class="k">## What I care about</span>
+Protecting his time, his reputation, and his 315k-contact CRM.
+I would rather ask once than break something once.</pre></div>
+
+  <h3><span class="tagn">3.4</span>Create the rules file</h3>
+  <p class="body">Same folder, new note, name it <code>rules</code>. This is the safety spine of the whole system.</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">JarvisVault\Jarvis\rules.md</span></div><pre><span class="c"># JARVIS — Operating Rules</span>
+
+<span class="k">## Always confirm before (non-negotiable)</span>
+- Sending any email, SMS, or outreach message
+- Posting anything publicly
+- Spending money or consuming paid API credits at scale
+- Deleting or overwriting files
+- Pushing to GitHub or deploying anything
+- Any write action against GHL, Apollo, or a live client
+
+Show a preview. Wait for an explicit "yes". Never assume.
+
+<span class="k">## Never</span>
+- Put an API key in frontend code or any file that leaves this machine
+- Force push to the main branch
+- Touch a client's live system without being asked in that same session
+- Invent a fact. If I don't know, I say I don't know.
+
+<span class="k">## Always</span>
+- Log every action taken to Jarvis/logs/
+- Write new facts I learn to Jarvis/memory/
+- Read Jarvis/identity.md and Jarvis/rules.md at the start of every session
+- Prefer the cheapest model that does the job well (Haiku for structured tasks)</pre></div>
+
+  <h3><span class="tagn">3.5</span>Seed the business context</h3>
+  <p class="body">Click the <b>Summit</b> folder → new note → name it <code>context</code>. This is what makes Jarvis useful to <i>your</i> business instead of generic.</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">JarvisVault\Summit\context.md</span></div><pre><span class="c"># Summit Voice AI — Business Context</span>
+
+<span class="k">## The offer</span>
+AI voice + automation system ("Ava") that answers calls 24/7,
+books jobs, follows up leads, reactivates dormant CRM contacts,
+and automates Google review requests.
+Pricing: $497 to $997/month plus setup. Framed as about $16/day.
+
+<span class="k">## The revenue math (the closer)</span>
+Average roofing job value: $9,500
+Missed calls per year: 1,095 to 1,825
+Recoverable revenue: $1.56M to $8.67M per contractor
+Anchor every pitch to this.
+
+<span class="k">## Current state</span>
+9 active clients. Goal: $25K MRR then $100K+ MRR.
+GHL CRM with 315,000+ roofing contacts, 15 workflows.
+Apollo scraper for city-by-city lead gen, scoring 0-100 (80+ = auto demo build).
+Railway FastAPI backend. Vercel frontend. Supabase with RLS.
+
+<span class="k">## Writing style for all copy</span>
+Hormozi-influenced. Short sentences, line breaks between them.
+Direct. Human. Never salesy or template-feeling.
+No em dashes, use ellipses. Lowercase subject lines.
+Never name the product on first touch in cold outreach.
+
+<span class="k">## Rules of engagement</span>
+Calendly link only on positive replies: calendly.com/aivoice/call
+Never in a first touch.</pre></div>
+
+  <h3><span class="tagn">3.6</span>Load your reference material</h3>
+  <p class="body">Drag your <b>Summit Voice AI Sales Playbook PDF</b> straight into the <code>Jarvis/knowledge</code> folder in Obsidian's sidebar. Do the same with any screenshots or docs you want Jarvis to know. It reads them on demand.</p>
+  <div class="note cyan"><b>Why this matters more than it looks:</b> every fact you put in the vault now is a fact you never have to re-explain. Jarvis reads <code>identity.md</code> and <code>rules.md</code> at the start of every single session — so its personality and guardrails survive restarts, updates, and model changes.</div>
+
+  <h3><span class="tagn">3.7</span>Turn off Obsidian's file-lock behavior</h3>
+  <p class="body">In Obsidian: <b>Settings</b> (gear, bottom-left) → <b>Files &amp; Links</b> → set <b>Default location for new notes</b> to <b>"In the folder specified below"</b> and enter <code>Daily</code>. Then go to <b>Settings → About</b> and turn <b>off</b> "Automatic updates" if you want zero surprises. That's it — no plugins needed for Stage 1.</p>
+
+  <div class="note green"><b>✅ Part 3 test:</b> open PowerShell and run <code>dir $env:USERPROFILE\JarvisVault\Jarvis</code>. You should see <code>identity.md</code>, <code>rules.md</code>, and your folders. If the files are there, Jarvis has a memory to wake up into.</div>
+</section>
+
+<!-- PART 4 -->
+<section class="section reveal" id="p4">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Part 04</div></div>
+  </div>
+  <h2>Create the project + the master brain file</h2>
+  <p class="lede">This is the single most important file in the build. <code>CLAUDE.md</code> is the blueprint Claude Code reads to build everything else. You write it once, and the AI constructs the entire project from it.</p>
+
+  <h3><span class="tagn">4.1</span>Make the project folder</h3>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — create and enter the project</span></div><pre>cd $env:USERPROFILE
+mkdir Jarvis
+cd Jarvis
+code .</pre></div>
+  <p class="body">That last command (<code>code .</code>) opens this folder in VS Code. Leave VS Code open — it's your window into the project from here on.</p>
+
+  <h3><span class="tagn">4.2</span>Create <code>CLAUDE.md</code></h3>
+  <p class="body">In VS Code: hover over the <b>JARVIS</b> heading in the left sidebar → click the <b>New File</b> icon (page with a +) → type <code>CLAUDE.md</code> → press Enter. Now paste the entire blueprint below into it and save with <b>Ctrl+S</b>.</p>
+
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">C:\Users\DanGi\Jarvis\CLAUDE.md — the master blueprint</span></div><pre><span class="c"># CLAUDE.md — PROJECT JARVIS (Windows 11)</span>
+
+<span class="k">## What you are building</span>
+JARVIS: a personal AI operator for Dan Gill that runs on Windows.
+Reachable three ways: desk voice, phone text, inbound phone call.
+It reads files, calendar and email, starts and monitors builds,
+drafts documents, and remembers everything in an Obsidian vault.
+
+<span class="k">## Identity (load at every session start)</span>
+Read these two files first, always:
+  C:\Users\DanGi\JarvisVault\Jarvis\identity.md
+  C:\Users\DanGi\JarvisVault\Jarvis\rules.md
+Adopt that persona and obey those rules for the entire session.
+
+<span class="k">## Environment</span>
+OS: Windows 11. Shell: PowerShell. Editor: VS Code.
+Python 3.12+, Node LTS installed. Do NOT assume bash, macOS,
+AppleScript, or Linux paths anywhere. Use Windows paths with
+backslashes and PowerShell-compatible commands only.
+
+<span class="k">## Project structure to create</span>
+Jarvis/
+  backend/
+    server.py          FastAPI app, the central nervous system
+    brain.py           Claude tool-calling loop
+    voice.py           Groq Whisper STT + ElevenLabs TTS
+    memory.py          Obsidian vault read/write
+    tools/             one file per tool group
+    requirements.txt
+  overlay/
+    main.js            Electron main process (transparent, always on top)
+    preload.js
+    index.html         the arc reactor orb UI
+    orb.js             Three.js particle orb
+    package.json
+  .env                 secrets (never committed)
+  .env.example
+  .gitignore           must include .env
+  run-jarvis.ps1       one script that starts everything
+
+<span class="k">## Backend requirements</span>
+- FastAPI + uvicorn, running on port 8765
+- WebSocket at /ws for the overlay (sends state + transcript)
+- POST /chat        text in, text out, full tool access
+- POST /voice       audio in, transcribe, think, return audio
+- GET  /health      returns ok
+- Model routing: Claude Sonnet for reasoning, Haiku for
+  structured/simple tasks. Never hardcode a model in more than one place.
+- Every response streams so the orb can react in real time.
+
+<span class="k">## Voice requirements</span>
+- STT: Groq Whisper (whisper-large-v3-turbo). Free tier.
+- TTS: ElevenLabs, voice id from env ELEVENLABS_VOICE_ID.
+- Stream TTS sentence by sentence, do not wait for the full reply.
+- Emit audio amplitude over the WebSocket so the orb pulses with speech.
+
+<span class="k">## Overlay requirements (this is the Iron Man part)</span>
+- Electron window: frameless, transparent, alwaysOnTop, skipTaskbar
+- Position bottom-right, roughly 340x340, draggable
+- Click-through when idle so it never blocks your work
+- Three.js particle orb, about 2000 particles in a sphere
+- Orb state colors:
+    idle      = cyan   (#3BE8FF) slow rotation
+    listening = green  (#41F5A0) particles pull inward
+    thinking  = amber  (#FFB020) fast turbulent rotation
+    speaking  = cyan bright, radius pulses with audio amplitude
+    error     = red    (#FF6B6B)
+- Small transcript line under the orb, fades after 6 seconds
+- Global hotkey Ctrl+Shift+J to wake/sleep Jarvis
+
+<span class="k">## Memory requirements</span>
+- Vault root from env OBSIDIAN_VAULT
+- On startup: read Jarvis/identity.md, Jarvis/rules.md, Summit/context.md
+- After any session with a new durable fact, append to
+  Jarvis/memory/YYYY-MM.md with a date stamp
+- Log every tool action to Jarvis/logs/YYYY-MM-DD.md
+- Never delete vault files. Append or create only.
+
+<span class="k">## Hard safety rules (build these in, do not make them optional)</span>
+- Any tool that sends, posts, spends, deploys, or deletes must
+  return a preview and require an explicit user confirmation first.
+- Secrets load from .env only. Never write a key into any file
+  in overlay/ or any file that could be committed.
+- .gitignore must contain .env before the first commit.
+- On any unhandled error, set orb state to error and say what broke.
+
+<span class="k">## Environment variables (read from .env)</span>
+ANTHROPIC_API_KEY=
+GROQ_API_KEY=
+ELEVENLABS_API_KEY=
+ELEVENLABS_VOICE_ID=
+OBSIDIAN_VAULT=C:\Users\DanGi\JarvisVault
+JARVIS_PORT=8765
+
+<span class="k">## How to work with me</span>
+1. Before installing anything global, tell me what and why, and wait.
+2. Build the backend first and prove /health works before the overlay.
+3. After each major piece, give me one command to test it.
+4. If something needs a key I have not given you, stop and ask.
+5. Explain what you did in plain English. I am not a developer.</pre></div>
+
+  <div class="note cyan"><b>What you just wrote:</b> that file is a contract. Claude Code will read it every time it works in this folder, so its behavior stays consistent across days, sessions, and model updates. If Jarvis ever starts drifting from what you want, you fix it here, not by re-explaining in chat.</div>
+
+  <h3><span class="tagn">4.3</span>Create the <code>.env</code> file (your keys)</h3>
+  <p class="body">New file in VS Code, name it exactly <code>.env</code> (yes, starting with a dot). Paste this, then replace each <code>PASTE_HERE</code> with the real keys from your Notepad.</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">C:\Users\DanGi\Jarvis\.env</span></div><pre>ANTHROPIC_API_KEY=PASTE_HERE
+GROQ_API_KEY=PASTE_HERE
+ELEVENLABS_API_KEY=PASTE_HERE
+ELEVENLABS_VOICE_ID=PASTE_HERE
+OBSIDIAN_VAULT=C:\Users\DanGi\JarvisVault
+JARVIS_PORT=8765</pre></div>
+  <p class="body">No quotes, no spaces around the <code>=</code>. Save with Ctrl+S.</p>
+
+  <h3><span class="tagn">4.4</span>Protect your keys immediately</h3>
+  <p class="body">Before anything else touches this folder, make sure <code>.env</code> can never be uploaded anywhere. New file named <code>.gitignore</code>:</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">C:\Users\DanGi\Jarvis\.gitignore</span></div><pre>.env
+node_modules/
+__pycache__/
+.venv/
+*.log
+dist/</pre></div>
+  <div class="note red"><b>Do this now, not later.</b> The single most common way people leak API keys is committing a <code>.env</code> file before they created a <code>.gitignore</code>. Once a key touches a public repo, assume it's compromised and rotate it.</div>
+
+  <div class="note green"><b>✅ Part 4 test:</b> your <code>Jarvis</code> folder in VS Code should show exactly three files — <code>CLAUDE.md</code>, <code>.env</code>, and <code>.gitignore</code>. That's the whole seed. Everything else gets built for you next.</div>
+</section>
+
+<!-- PART 5 -->
+<section class="section reveal" id="p5">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Part 05 · Stage 1</div></div>
+  </div>
+  <h2>Build the brain, the voice, and the orb</h2>
+  <p class="lede">Now the fun part. You're going to hand the blueprint to Claude Code and watch it build a working Jarvis. Your job is to read what it says, answer its questions, and run the test commands.</p>
+
+  <h3><span class="tagn">5.1</span>Start Claude Code in the project</h3>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell</span></div><pre>cd $env:USERPROFILE\Jarvis
+claude</pre></div>
+  <p class="body">Claude Code opens right inside your terminal. It automatically reads <code>CLAUDE.md</code>. Now give it this exact instruction:</p>
+
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code</div>
+    <p>Read CLAUDE.md carefully. Build the backend first — server.py, brain.py, voice.py, memory.py, and requirements.txt — but do not build the overlay yet. Before you install any Python packages, list exactly what you want to install and why, then wait for my approval. When the backend is done, give me one single command to test that /health works. Explain everything in plain English, I am not a developer.</p>
+  </div>
+
+  <p class="body">Claude Code will now think, then start creating files. You'll see them appear in VS Code's sidebar in real time. When it asks permission to run a command, read it, then type <b>y</b> and Enter to approve.</p>
+
+  <div class="note"><b>What "approve" means:</b> Claude Code never runs anything on your machine without asking. When you see a prompt like "Run: pip install fastapi?", that's it asking permission. Approving package installs from PyPI is normal and safe. If it ever asks to delete something or push to GitHub, read carefully first.</div>
+
+  <h3><span class="tagn">5.2</span>Set up the Python environment</h3>
+  <p class="body">Claude Code will likely do this for you, but if it asks you to run it yourself, here's exactly what and why. A "virtual environment" is a private box for this project's Python packages so they don't collide with anything else on your computer.</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — create and activate the venv</span></div><pre>cd $env:USERPROFILE\Jarvis
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1</pre></div>
+  <p class="body">After activating, your PowerShell line starts with <code>(.venv)</code>. That's how you know it worked.</p>
+  <div class="note red"><b>If you get "running scripts is disabled on this system":</b> Windows blocks scripts by default. Run this once, answer <b>Y</b>, then retry the activate command:<br><br><code>Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned</code></div>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — install the backend packages</span></div><pre>pip install fastapi uvicorn[standard] anthropic groq elevenlabs python-dotenv websockets python-multipart httpx</pre></div>
+  <table class="tbl">
+    <tr><th>Package</th><th>What it does</th></tr>
+    <tr><td><b>fastapi + uvicorn</b></td><td>The web server that is Jarvis's nervous system.</td></tr>
+    <tr><td><b>anthropic</b></td><td>Talks to Claude — the actual brain.</td></tr>
+    <tr><td><b>groq</b></td><td>Turns your speech into text (the ears).</td></tr>
+    <tr><td><b>elevenlabs</b></td><td>Turns text into Jarvis's voice.</td></tr>
+    <tr><td><b>python-dotenv</b></td><td>Loads your secret keys from <code>.env</code>.</td></tr>
+    <tr><td><b>websockets</b></td><td>The live connection between backend and the orb.</td></tr>
+  </table>
+
+  <h3><span class="tagn">5.3</span>Test the backend</h3>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — start Jarvis's backend</span></div><pre>cd $env:USERPROFILE\Jarvis
+.\.venv\Scripts\Activate.ps1
+python backend\server.py</pre></div>
+  <p class="body">You should see something like <code>Uvicorn running on http://127.0.0.1:8765</code>. Leave this window running. Open a <b>second</b> PowerShell window (Windows key → powershell) and run:</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell window 2 — health check</span></div><pre>curl http://127.0.0.1:8765/health</pre></div>
+  <p class="body">If you get back something with <code>ok</code> in it, <b>the brain is alive.</b> That's the milestone.</p>
+
+  <h3><span class="tagn">5.4</span>Test the brain with text</h3>
+  <p class="body">Before adding voice, prove it can think and reach your vault.</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell window 2 — talk to Jarvis in text</span></div><pre>curl -X POST http://127.0.0.1:8765/chat -H "Content-Type: application/json" -d '{\"message\":\"Who are you and what are your rules?\"}'</pre></div>
+  <p class="body">If it answers <i>in character</i> — calm, British, referencing your rules — then it successfully read your vault. Memory is wired.</p>
+  <div class="note"><b>If it answers generically</b> ("I'm Claude, an AI assistant"), it didn't load the vault. Tell Claude Code: <i>"The /chat endpoint isn't loading identity.md and rules.md from the vault at startup. Fix it so every request includes that context."</i></div>
+
+  <h3><span class="tagn">5.5</span>Add the voice</h3>
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code</div>
+    <p>The backend works and /chat responds in character. Now wire voice.py: Groq Whisper for speech-to-text using whisper-large-v3-turbo, and ElevenLabs for text-to-speech using the voice ID in my .env. Stream the TTS sentence by sentence so it starts talking before the full answer is done. Also send the audio amplitude over the WebSocket at /ws so the orb can pulse with the voice later. Give me one command to test that I can speak and hear a reply.</p>
+  </div>
+  <div class="note cyan"><b>Wear headphones for this test.</b> If you use speakers, the microphone hears Jarvis's own voice and it talks to itself in a loop. Headphones eliminate it completely — this is the single most common frustration people hit.</div>
+
+  <h3><span class="tagn">5.6</span>Build the arc reactor orb</h3>
+  <p class="body">Now the part that makes you feel like Tony Stark.</p>
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code</div>
+    <p>Backend and voice both work. Now build the overlay exactly as described in CLAUDE.md. Electron, frameless, transparent, always on top, bottom-right, draggable, click-through when idle. Inside it, a Three.js particle orb with about 2000 particles arranged in a sphere. It connects to the backend WebSocket at ws://127.0.0.1:8765/ws and changes state color: cyan idle with slow rotation, green when listening with particles pulling inward, amber when thinking with fast turbulent motion, bright cyan when speaking with the sphere radius pulsing to the audio amplitude, red on error. Add a transcript line under the orb that fades after six seconds. Register a global hotkey Ctrl+Shift+J to wake and sleep it. Give me one command to launch it.</p>
+  </div>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell window 3 — launch the orb</span></div><pre>cd $env:USERPROFILE\Jarvis\overlay
+npm install
+npm start</pre></div>
+  <p class="body">A glowing orb should appear floating in the bottom-right of your screen, above every other window. Press <b>Ctrl+Shift+J</b>, say <i>"Jarvis, what are you?"</i> — and watch it turn green while listening, amber while thinking, then pulse cyan as it answers you out loud.</p>
+
+  <div class="note green"><b>✅ Part 5 complete — this is the moment.</b> You now have a working Jarvis: it hears you, thinks with Claude, remembers through your vault, speaks in a British voice, and visualizes its state in a floating arc reactor. Everything after this adds reach and power to a system that already works.</div>
+
+  <h3><span class="tagn">5.7</span>One command to start it all</h3>
+  <p class="body">Three PowerShell windows every time is tedious. Ask for a launcher:</p>
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code</div>
+    <p>Create run-jarvis.ps1 in the project root that starts the backend in one window and the overlay in another, activating the venv automatically. Then tell me how to make a desktop shortcut that runs it with one double-click.</p>
+  </div>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — from now on, this is all you run</span></div><pre>cd $env:USERPROFILE\Jarvis
+.\run-jarvis.ps1</pre></div>
+</section>
+
+<!-- PART 6 -->
+<section class="section reveal" id="p6">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Part 06 · Stage 2</div></div>
+  </div>
+  <h2>Give Jarvis hands — the MCP tools</h2>
+  <p class="lede">Right now Jarvis can think and talk. MCP servers are plug-ins that let it <i>do</i> things: read your vault properly, control files and the terminal, drive a browser, see your calendar and email, and edit code surgically.</p>
+
+  <h3><span class="tagn">6.1</span>How MCP works in one paragraph</h3>
+  <p class="body">An MCP server is a small program that exposes a set of abilities. You register it once, and from then on Claude Code can call it. Registration is a single command per server. You do not need to understand what's inside them.</p>
+
+  <h3><span class="tagn">6.2</span>Install the core tools</h3>
+  <p class="body">Run these one at a time in PowerShell from your Jarvis folder. Wait for each to finish before the next.</p>
+
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — Obsidian vault access</span></div><pre>cd $env:USERPROFILE\Jarvis
+claude mcp add obsidian -- npx -y obsidian-mcp "C:\Users\DanGi\JarvisVault"</pre></div>
+  <p class="body">Now Jarvis can list, read, search, create and edit notes in your vault as structured operations instead of raw file pokes.</p>
+
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — files + terminal control</span></div><pre>claude mcp add desktop-commander -- npx -y @wonderwhy-er/desktop-commander</pre></div>
+  <p class="body">This is the "makes Claude actually do stuff" one — it can search your whole machine, edit files, and run terminal commands. This is what lets Jarvis answer <i>"what's in the works?"</i> by genuinely looking.</p>
+
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — always-current documentation</span></div><pre>claude mcp add context7 -- npx -y @upstash/context7-mcp</pre></div>
+  <p class="body">Stops Jarvis writing code against outdated APIs. Cheap, high value, install it and forget it.</p>
+
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — browser automation</span></div><pre>claude mcp add playwright -- npx -y @playwright/mcp@latest</pre></div>
+  <p class="body">Now Jarvis can open a browser, log into sites, fill forms, click things, and take screenshots. This powers demo-site QA and web research.</p>
+
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — page inspection and debugging</span></div><pre>claude mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest</pre></div>
+
+  <h3><span class="tagn">6.3</span>Verify they all registered</h3>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — list installed MCP servers</span></div><pre>claude mcp list</pre></div>
+  <p class="body">You should see all five listed. If one shows an error, remove and re-add it: <code>claude mcp remove NAME</code> then run its add command again.</p>
+
+  <h3><span class="tagn">6.4</span>Calendar and email</h3>
+  <p class="body">You have two clean paths here. Pick based on what you actually use.</p>
+  <table class="tbl">
+    <tr><th>If you use</th><th>Do this</th></tr>
+    <tr><td><b>Gmail / Google Calendar</b></td><td>Easiest path: use the built-in <b>connectors</b> in the Claude desktop app (Settings → Connectors → enable Google Calendar and Gmail). Then have Jarvis's backend call out to Claude with those tools available. No custom OAuth work.</td></tr>
+    <tr><td><b>Outlook / Microsoft 365</b></td><td>Ask Claude Code to build a small read-only Microsoft Graph integration. You register an app at <a href="https://portal.azure.com" target="_blank">portal.azure.com</a> → App registrations → New registration → add delegated permissions <code>Calendars.Read</code> and <code>Mail.Read</code>.</td></tr>
+  </table>
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code (Outlook path)</div>
+    <p>Add a read-only calendar and email capability to the backend using Microsoft Graph. Walk me through the Azure app registration step by step with exactly what to click, then build the token flow and two tools: get_todays_events and get_recent_important_email. Read-only only, no send permission at all. Store the client ID and secret in .env.</p>
+  </div>
+  <div class="note red"><b>Deliberate choice: read-only email.</b> Give Jarvis permission to <i>read</i> mail and <i>draft</i> replies, but never to send unattended. Drafts land in your outbox for one click. This single decision prevents the worst-case failure mode of the entire system.</div>
+
+  <h3><span class="tagn">6.5</span>Precise code editing (optional but excellent)</h3>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — Serena semantic code toolkit</span></div><pre>claude mcp add serena -- npx -y serena-mcp-server</pre></div>
+  <p class="body">Serena gives Jarvis symbol-level understanding of code, so it makes surgical edits instead of rewriting whole files. Worth it once Jarvis starts touching your Summit codebase.</p>
+
+  <h3><span class="tagn">6.6</span>Teach Jarvis to check on builds</h3>
+  <p class="body">You asked for <i>"look at the status of builds, start builds for me based off prompts."</i> Here's how that gets wired:</p>
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code</div>
+    <p>Add a tools/builds.py to the backend with three tools. One: list_running_processes that reports what dev servers and builds are currently running on this machine using PowerShell. Two: check_project_status that takes a folder path and reports git branch, uncommitted changes, and last commit. Three: start_build that takes a plain English description, creates a new folder under C:\Users\DanGi\Projects, writes a starter CLAUDE.md for that project, and launches a new Claude Code session in it in a separate PowerShell window. start_build must show me the plan and require my confirmation before it runs.</p>
+  </div>
+  <p class="body">Once that lands, you can say out loud: <i>"Jarvis, what's running right now?"</i> and <i>"Jarvis, start a new build — a landing page for a roofing client in Denver."</i> It scaffolds the project and spins up a Claude Code session to do the work.</p>
+
+  <div class="note green"><b>✅ Part 6 test:</b> say to Jarvis <i>"read my identity file and tell me the last three things in my logs folder."</i> If it answers accurately, the vault tools work. Then ask <i>"what dev servers am I running right now?"</i> — if it can see them, the hands are live.</div>
+</section>
+
+<!-- PART 7 -->
+<section class="section reveal" id="p7">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Part 07 · Stage 3</div></div>
+  </div>
+  <h2>Text it. Call it. From anywhere on Earth.</h2>
+  <p class="lede">Three separate channels, easiest first. By the end of this part you can be in an airport and phone your own computer.</p>
+
+  <h3><span class="tagn">7.1</span>Channel A — control Claude Code from your phone (free, 5 minutes)</h3>
+  <p class="body">Happy is an open-source mobile client that mirrors your live Claude Code session to your phone, with realtime voice and push notifications. You run <code>happy</code> instead of <code>claude</code>, and your session becomes reachable from the app.</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — install Happy</span></div><pre>npm install -g happy-coder</pre></div>
+  <ol class="steps">
+    <li><h4>Install the phone app</h4><p>Search <b>"Happy Coder"</b> in the iOS App Store or Google Play and install it.</p></li>
+    <li><h4>Start a session from your PC</h4><p>In your project folder run <code>happy</code> instead of <code>claude</code>. A QR code appears in the terminal.</p></li>
+    <li><h4>Scan it in the app</h4><p>Your session is now paired and end-to-end encrypted. Your code never leaves your devices unencrypted.</p></li>
+    <li><h4>Use it</h4><p>Watch builds run from anywhere, talk to it with realtime voice, get push notifications when it needs permission. Press any key on your PC keyboard to take control back.</p></li>
+  </ol>
+  <div class="note cyan"><b>This alone is a huge unlock.</b> You can kick off a build at your desk, leave for a meeting, and monitor and steer it from your phone. It's free, encrypted, and takes five minutes.</div>
+
+  <h3><span class="tagn">7.2</span>Channel B — text Jarvis via Telegram (free, 15 minutes)</h3>
+  <p class="body">Telegram is the cheapest way to text your Jarvis. You create a bot, get a token, and point it at your backend.</p>
+  <ol class="steps">
+    <li><h4>Install Telegram</h4><p>Get it on your phone from the App Store / Play Store and sign up with your phone number.</p></li>
+    <li><h4>Talk to BotFather</h4><p>In Telegram, search for <b>@BotFather</b> (the one with the blue checkmark) and tap <b>Start</b>.</p></li>
+    <li><h4>Create your bot</h4><p>Send the message <code>/newbot</code>. It asks for a display name — send <code>Jarvis</code>. Then it asks for a username that must end in "bot" — send something unique like <code>dan_jarvis_ops_bot</code>.</p></li>
+    <li><h4>Copy the token</h4><p>BotFather replies with a token that looks like <code>7891234567:AAH...</code>. Paste it into your Notepad and into <code>.env</code> as <code>TELEGRAM_BOT_TOKEN=</code></p></li>
+    <li><h4>Get your chat ID</h4><p>Search for <b>@userinfobot</b> in Telegram, press Start, and it replies with your numeric ID. Add it to <code>.env</code> as <code>TELEGRAM_CHAT_ID=</code> — this is what stops strangers from using your Jarvis.</p></li>
+  </ol>
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code</div>
+    <p>Add Telegram to the backend. Use long polling so I do not need a public URL. It should accept text messages, run them through the same brain and tools as the desk channel, and reply in Telegram. Critical: reject and log any message from a chat ID that is not TELEGRAM_CHAT_ID in my .env. Also add proactive notifications so Jarvis can message me when a long build finishes or a tool needs my confirmation.</p>
+  </div>
+  <div class="note green"><b>✅ Test:</b> text your bot <i>"what's on my calendar today?"</i> from your phone. If it answers, you now have a pocket Jarvis.</div>
+
+  <h3><span class="tagn">7.3</span>Channel C — a real phone number you can call</h3>
+  <p class="body">This is the Iron Man moment. A Twilio number rings, Jarvis picks up, and you have a natural conversation that can trigger real operations.</p>
+
+  <h4>Why it runs on Railway, not your laptop</h4>
+  <p class="body">Twilio needs a public web address to send the call to. Your home PC doesn't have one, and it sleeps. You already have an always-on Railway FastAPI backend — that becomes the phone brain. Your laptop can be closed and Jarvis still answers.</p>
+
+  <h4>Step 1 — Buy the number</h4>
+  <ol class="steps">
+    <li><h4>Create a Twilio account</h4><p>Go to <a href="https://www.twilio.com/try-twilio" target="_blank">twilio.com/try-twilio</a>, sign up, and verify your email and your own phone number.</p></li>
+    <li><h4>Upgrade from trial</h4><p>Trial accounts add a nagging message before every call. Click <b>Upgrade</b> and add $20. This is the real cost of the whole phone channel.</p></li>
+    <li><h4>Buy a phone number</h4><p>Left sidebar → <b>Phone Numbers</b> → <b>Manage</b> → <b>Buy a number</b>. Filter by your area code, make sure <b>Voice</b> and <b>SMS</b> capabilities are both checked, and click <b>Buy</b>. About $1.15/month.</p></li>
+    <li><h4>Copy your credentials</h4><p>Go to the Twilio <b>Console dashboard</b> (home icon). Copy your <b>Account SID</b> and <b>Auth Token</b> into Notepad, plus the number you just bought in the format <code>+14105551234</code>.</p></li>
+  </ol>
+
+  <h4>Step 2 — Build the phone brain</h4>
+  <p class="body">Twilio's <b>ConversationRelay</b> handles the speech-to-text and text-to-speech inside Twilio itself, so your server only trades plain text with Claude. That's what keeps the conversation fast enough to feel natural — the hard latency problem is solved for you.</p>
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code</div>
+    <p>Build the phone channel as a separate deployable service in a folder called phone-brain, designed to deploy to Railway. Use Twilio ConversationRelay: a POST /twiml endpoint that returns TwiML opening a Connect Stream to my websocket, and a /ws endpoint that receives caller text, sends it to Claude with my identity and rules loaded, and streams the reply text back for Twilio to speak. Verify the Twilio request signature on every request so nobody else can hit my endpoint. Add a PIN check: the caller must say a 4 digit code before any tool runs, and the code lives in .env. Give me the exact steps to deploy this to Railway and the exact URL to paste into the Twilio console.</p>
+  </div>
+
+  <h4>Step 3 — Point the number at your brain</h4>
+  <ol class="steps">
+    <li><h4>Deploy to Railway</h4><p>Follow the steps Claude Code gives you. You'll end up with a public URL like <code>https://jarvis-phone-production.up.railway.app</code>.</p></li>
+    <li><h4>Add your keys to Railway</h4><p>In the Railway dashboard → your service → <b>Variables</b> → add <code>ANTHROPIC_API_KEY</code>, <code>TWILIO_AUTH_TOKEN</code>, and <code>JARVIS_PHONE_PIN</code>. Never put these in the code itself.</p></li>
+    <li><h4>Wire the Twilio number</h4><p>Twilio Console → <b>Phone Numbers</b> → <b>Manage</b> → <b>Active numbers</b> → click your number. Scroll to <b>Voice Configuration</b>. Under <b>"A call comes in"</b> choose <b>Webhook</b>, paste <code>https://YOUR-RAILWAY-URL/twiml</code>, set the method to <b>HTTP POST</b>, and click <b>Save configuration</b> at the bottom.</p></li>
+    <li><h4>Call it</h4><p>Ring your Twilio number from your cell phone. Jarvis should answer, ask for your PIN, and then take instructions.</p></li>
+  </ol>
+
+  <div class="kv">
+    <div class="cell"><div class="l">Number rental</div><div class="v amber">$1.15<span style="font-size:.75rem">/mo</span></div></div>
+    <div class="cell"><div class="l">Inbound voice</div><div class="v amber">~$0.014<span style="font-size:.75rem">/min</span></div></div>
+    <div class="cell"><div class="l">Telegram</div><div class="v green">FREE</div></div>
+    <div class="cell"><div class="l">Happy</div><div class="v green">FREE</div></div>
+  </div>
+
+  <div class="note red"><b>Security is not optional on this channel.</b> A public phone number is a door into your business systems. Three locks, all of them required: <b>(1)</b> verify Twilio's request signature so only Twilio can call your endpoint, <b>(2)</b> a spoken PIN before any tool runs, <b>(3)</b> caller ID allow-list so only your own numbers get past the greeting. Have Claude Code implement all three.</div>
+
+  <div class="note green"><b>✅ Part 7 complete.</b> You can now reach Jarvis three ways: voice at your desk, text from your pocket, and a phone call from anywhere on Earth. This is the capability you described at the start.</div>
+</section>
+
+<!-- PART 8 -->
+<section class="section reveal" id="p8">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Part 08 · Stage 4</div></div>
+  </div>
+  <h2>Connect Summit OS — Jarvis runs the business</h2>
+  <p class="lede">This is where Jarvis stops being a clever assistant and becomes an operator. It gets tools that hit the Railway endpoints you already built, so you can ask about your business out loud and act on the answer.</p>
+
+  <h3><span class="tagn">8.1</span>Add your Summit credentials</h3>
+  <p class="body">Open <code>.env</code> in VS Code and add these lines:</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">Add to C:\Users\DanGi\Jarvis\.env</span></div><pre>SUMMIT_RAILWAY_URL=https://your-railway-url.up.railway.app
+SUMMIT_API_KEY=your_ava_api_key
+GHL_PRIVATE_TOKEN=your_ghl_token
+APOLLO_API_KEY=your_apollo_key</pre></div>
+
+  <h3><span class="tagn">8.2</span>Build the read-only reporting tools</h3>
+  <p class="body">Start here. Read-only tools are safe to run without confirmation, which makes them instantly useful.</p>
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code</div>
+    <p>Create backend/tools/summit.py with read-only tools that call my Railway API using SUMMIT_RAILWAY_URL and SUMMIT_API_KEY from .env. Build four tools: get_clients hitting /clients, get_agent_status hitting /agents/status, get_activity_feed hitting /analytics/activity-feed, and a summarize_business_state tool that calls all three and returns a short plain-English briefing. These are read-only so they can run without confirmation. Handle errors gracefully — if the API is down, say so clearly instead of inventing numbers.</p>
+  </div>
+  <p class="body">Now you can ask out loud:</p>
+  <ul class="clean">
+    <li><b>"Jarvis, how many active clients do we have?"</b></li>
+    <li><b>"What has the outreach done in the last 24 hours?"</b></li>
+    <li><b>"Are all the agents healthy?"</b></li>
+    <li><b>"Give me a business briefing."</b> — the one you'll use every morning</li>
+  </ul>
+
+  <h3><span class="tagn">8.3</span>Add the action tools (gated)</h3>
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code</div>
+    <p>Now add action tools to summit.py. Every single one must return a preview and require explicit confirmation before executing — build a shared confirm_action helper so this is impossible to bypass. The tools: scrape_leads which takes a city and runs the Apollo scraper, build_demo_site which takes a company name and triggers the demo machine, dispatch_outreach which hits /dispatch, and draft_proposal which takes a client name and generates a proposal document. For draft_proposal, read Summit/context.md from my vault so the revenue math and writing style are correct, and save the output to my vault under Projects rather than sending it anywhere.</p>
+  </div>
+
+  <div class="note red"><b>The confirmation gate is the whole design.</b> You have 315,000 contacts and nine paying clients. An agent that can send outreach unattended is not leverage, it's a liability with a countdown timer. Preview then confirm costs you three seconds and removes an entire category of catastrophe.</div>
+
+  <h3><span class="tagn">8.4</span>Document generation with Claude skills</h3>
+  <p class="body">You asked for proposals, websites, and PDFs. Claude has built-in document skills — you just need Jarvis to know when to reach for them.</p>
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code</div>
+    <p>Add a documents tool group. When I ask for a proposal, one-pager, deck, or PDF, Jarvis should read Summit/context.md for the offer and revenue math, read Jarvis/knowledge for the Sales Playbook voice, generate the document, save it to my vault under Projects with today's date, and then tell me the file path. Follow my design standard: dark navy 0B1120 background, teal 0FA8C8 accent, Georgia display font for decks. Never send the document anywhere, just create it and tell me where it is.</p>
+  </div>
+
+  <h3><span class="tagn">8.5</span>The morning briefing routine</h3>
+  <p class="body">The highest-value habit in the whole build. One command, and you know where the business stands.</p>
+  <div class="prompt-box">
+    <div class="plabel">▸ Paste this to Claude Code</div>
+    <p>Create a daily briefing routine triggered when I say "morning briefing" or "brief me". It should pull today's calendar, any important unread email, the Summit business state from the read-only tools, what builds are currently running, and anything in my vault Daily folder from yesterday marked as unfinished. Return it as a short spoken summary, under 45 seconds of speech, prioritized by what needs me most. Then write the same briefing to my vault under Daily with today's date.</p>
+  </div>
+  <div class="note green"><b>✅ Part 8 test:</b> say <i>"Jarvis, brief me."</i> If you get a coherent 30-second rundown of your calendar, inbox, clients, and running builds, then Summit OS is connected and this thing is genuinely earning its keep.</div>
+</section>
+
+<!-- PART 9 -->
+<section class="section reveal" id="p9">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Part 09 · Stage 5</div></div>
+  </div>
+  <h2>Install the skills brain</h2>
+  <p class="lede">Skills are instruction packs that make Jarvis dramatically better at specific jobs. Below is every repo and skill from your screenshots, with an honest verdict and the exact install command for the ones worth having.</p>
+
+  <div class="note cyan"><b>Install these gradually, not all at once.</b> Every skill you add consumes context and can dilute focus. Start with the four marked <span class="badge b-core">CORE</span>, live with them a week, then add more as you hit real needs. More is not better — <i>relevant</i> is better.</div>
+
+  <h3><span class="tagn">9.1</span>How to install any skill</h3>
+  <p class="body">Most skills install with one command. Two patterns cover almost everything:</p>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — pattern A, the universal skills installer</span></div><pre>npx skills add OWNER/REPO</pre></div>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — pattern B, clone into your skills folder</span></div><pre>cd $env:USERPROFILE\.claude\skills
+git clone https://github.com/OWNER/REPO.git</pre></div>
+  <p class="body">If a repo's README gives its own install command, use that instead — it's authoritative. When unsure, paste the repo URL to Claude Code and say: <i>"check this repo is legitimate, then install it for me on Windows and tell me what it does."</i></p>
+
+  <h3><span class="tagn">9.2</span>Start with these four</h3>
+  <div class="cmd"><div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="lbl">PowerShell — the core four</span></div><pre><span class="c"># 1. The official Anthropic skill library</span>
+npx skills add anthropics/skills
+
+<span class="c"># 2. superpowers - the framework everyone forks</span>
+npx skills add obra/superpowers
+
+<span class="c"># 3. spec-kit - writes the full spec before any code</span>
+npx skills add github/spec-kit
+
+<span class="c"># 4. ui-ux-pro-max - turns Jarvis into a senior product designer</span>
+npx skills add ui-ux-pro-max</pre></div>
+
+  <h3><span class="tagn">9.3</span>The complete catalog from your screenshots</h3>
+  <p class="body">Everything you sent, catalogued. <span class="badge b-core">CORE</span> load-bearing · <span class="badge b-use">USE</span> install it · <span class="badge b-opt">OPTIONAL</span> when you need it · <span class="badge b-skip">SKIP</span> not for your business.</p>
+
+  <h4>Skill libraries</h4>
+  <table class="tbl">
+    <tr><th>Name</th><th>What it does &amp; why</th><th>Verdict</th></tr>
+    <tr><td><b>anthropics/skills</b></td><td>The official library — every SKILL.md Claude Code loads. Your baseline. Document creation, data analysis, and more.</td><td><span class="badge b-core">Core</span></td></tr>
+    <tr><td><b>obra/superpowers</b></td><td>Turns one-off prompts into reusable composable skills plus a real dev methodology. The most-forked framework in the ecosystem for good reason.</td><td><span class="badge b-core">Core</span></td></tr>
+    <tr><td><b>ui-ux-pro-max</b></td><td>Senior product designer instincts. Directly upgrades your demo machine and every client site Jarvis builds.</td><td><span class="badge b-core">Core</span></td></tr>
+    <tr><td><b>mattpocock/skills</b></td><td>Battle-tested TypeScript and dev-workflow skills from a respected engineer. You ship React/TS/Next, so this lands directly.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>sanyuan-skills</b></td><td>Expert code review — SOLID principles, security, edge cases before you ship. A solo founder's second pair of eyes.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>agent-browser</b> (Vercel)</td><td>Jarvis clicks and tests your app in a real browser. QA your demo sites before they go to a lead.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>karpathy-skills</b></td><td>One CLAUDE.md built from Karpathy's notes on where LLMs go wrong. Cheap reasoning upgrade, low risk.</td><td><span class="badge b-opt">Optional</span></td></tr>
+    <tr><td><b>scientific-agent-skills</b></td><td>Research, data and writing skills for science work. Useful for deep trend research, not core to roofing SaaS.</td><td><span class="badge b-opt">Optional</span></td></tr>
+    <tr><td><b>awesome-claude-skills</b><br><b>awesome-claude-code</b><br><b>awesome-claude-agents</b></td><td>Master directories of everything else, plus connectors to Slack, Jira, Linear, GitHub. Treat as reference catalogs to browse, not bulk installs.</td><td><span class="badge b-opt">Reference</span></td></tr>
+    <tr><td><b>Claude-Code-Game-Studios</b></td><td>49 agents and 72 skills for building games. Genuinely impressive engineering. Zero overlap with what you do.</td><td><span class="badge b-skip">Skip</span></td></tr>
+  </table>
+
+  <h4>Spec-driven development &amp; task orchestration</h4>
+  <table class="tbl">
+    <tr><th>Name</th><th>What it does &amp; why</th><th>Verdict</th></tr>
+    <tr><td><b>spec-kit</b></td><td>Claude writes the complete spec before writing any code. This is the direct antidote to the QualifyOS stall — it forces you to separate the products before building.</td><td><span class="badge b-core">Core</span></td></tr>
+    <tr><td><b>claude-task-master</b></td><td>Breaks big work into tasks it actually finishes. Pairs perfectly with spec-kit: spec defines, task-master ships.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>12-factor-agents</b></td><td>The methodology behind every agent that survives production. Not a tool — read it. It will change how you architect QualifyOS.</td><td><span class="badge b-use">Read it</span></td></tr>
+    <tr><td><b>claude-code-spec-workflow</b><br><b>get-shit-done</b></td><td>Alternative spec-driven systems covering the same ground as spec-kit. Pick one, not three — stacking them creates conflicting instructions.</td><td><span class="badge b-opt">Redundant</span></td></tr>
+    <tr><td><b>claude-code-templates</b><br><b>claude-code-workflows</b><br><b>claude-plugins-official</b></td><td>Configure and monitor Claude Code, battle-tested configs, and Anthropic's vetted plugin marketplace. Browse the official one first.</td><td><span class="badge b-opt">Optional</span></td></tr>
+    <tr><td><b>ECC</b></td><td>One harness tuning skills, instincts, memory and security together. Powerful but opinionated — adopt after your basics are stable, not before.</td><td><span class="badge b-opt">Later</span></td></tr>
+    <tr><td><b>gstack</b></td><td>Garry Tan's exact 23-tool setup acting as CEO, designer and QA. Interesting to study, heavy to adopt wholesale.</td><td><span class="badge b-opt">Study</span></td></tr>
+  </table>
+
+  <h4>MCP servers — senses and hands</h4>
+  <table class="tbl">
+    <tr><th>Name</th><th>What it does &amp; why</th><th>Verdict</th></tr>
+    <tr><td><b>DesktopCommanderMCP</b></td><td>Terminal and file control. The one that makes Claude actually do things on your machine. Installed in Part 6.</td><td><span class="badge b-core">Installed</span></td></tr>
+    <tr><td><b>obsidian-mcp</b></td><td>Structured vault operations — the memory backbone. Installed in Part 6.</td><td><span class="badge b-core">Installed</span></td></tr>
+    <tr><td><b>context7</b></td><td>Always-current documentation injected into context. Stops Jarvis coding against stale APIs. Installed in Part 6.</td><td><span class="badge b-core">Installed</span></td></tr>
+    <tr><td><b>playwright-mcp</b></td><td>Full browser automation — logins, forms, multi-step flows. Installed in Part 6.</td><td><span class="badge b-core">Installed</span></td></tr>
+    <tr><td><b>chrome-devtools-mcp</b></td><td>Google's own — inspect, debug and profile real pages instead of guessing. Installed in Part 6.</td><td><span class="badge b-use">Installed</span></td></tr>
+    <tr><td><b>serena</b></td><td>Semantic, symbol-level code editing. Surgical changes instead of full-file rewrites.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>sentry-mcp</b></td><td>Reads your real production errors and fixes at the source. Your Railway and Vercel stack throws errors — this closes the loop automatically.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>magic-mcp</b></td><td>Describe a UI, get polished React. Like v0 living inside Claude. Speeds the demo machine considerably.</td><td><span class="badge b-opt">Optional</span></td></tr>
+    <tr><td><b>deepwiki-open</b><br><b>Understand-Anything</b></td><td>Turn any repo into an interactive wiki or knowledge graph. Excellent when you inherit or revisit old code.</td><td><span class="badge b-opt">Optional</span></td></tr>
+    <tr><td><b>blender-mcp</b></td><td>Make 3D models by chatting. Legitimately cool. Only relevant if your ad creative goes 3D.</td><td><span class="badge b-skip">Skip</span></td></tr>
+  </table>
+
+  <h4>Memory &amp; context</h4>
+  <table class="tbl">
+    <tr><th>Name</th><th>What it does &amp; why</th><th>Verdict</th></tr>
+    <tr><td><b>Obsidian vault</b></td><td>Your source of truth. Human-readable, versionable, no lock-in. Built in Part 3.</td><td><span class="badge b-core">Core</span></td></tr>
+    <tr><td><b>mem0</b></td><td>Cross-session recall engine. "Remember the deploy is Friday" surfaced three weeks later. Sits on top of the vault.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>supermemory</b></td><td>Fast memory engine that runs fully local. A privacy-first alternative to mem0 — pick one, running both creates conflicting memories.</td><td><span class="badge b-opt">Alternative</span></td></tr>
+    <tr><td><b>repomix</b></td><td>Packs an entire repo into one prompt. Essential when Jarvis works across your Summit codebase.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>gitingest</b></td><td>Swap <code>hub</code> for <code>ingest</code> in any GitHub URL and get the whole repo as one prompt. No install needed — just edit the URL. <b>This is what you were thinking of as "grapify."</b></td><td><span class="badge b-use">Use</span></td></tr>
+  </table>
+
+  <h4>Data, research &amp; content</h4>
+  <table class="tbl">
+    <tr><th>Name</th><th>What it does &amp; why</th><th>Verdict</th></tr>
+    <tr><td><b>crawl4ai</b></td><td>Any website into clean markdown Claude can read. Powers competitor research feeding your content strategy.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>docling</b></td><td>PDFs and Word files into structured markdown with no OCR bill. Use it to ingest your Sales Playbook into the vault properly.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>gpt-researcher</b></td><td>Deep research agent that cites its sources. Good for trend research and content briefs.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>nexu-io/open-design</b></td><td>Open-source design engine — prototypes, landing pages, dashboards, slides, with HTML/PDF/PPTX export. Strong fit for your demo machine and ad pipeline.</td><td><span class="badge b-opt">Optional</span></td></tr>
+    <tr><td><b>activepieces</b></td><td>Self-hostable Zapier with around 400 MCP servers. You already run n8n and GHL — only add if you genuinely outgrow them.</td><td><span class="badge b-opt">Optional</span></td></tr>
+    <tr><td><b>pr-agent</b></td><td>AI review on every pull request. Good hygiene, lower priority as a solo developer.</td><td><span class="badge b-opt">Optional</span></td></tr>
+    <tr><td><b>OfficeCLI</b>, <b>hallmark</b></td><td>Office docs via CLI and markdown/email rendering. Your Claude document skills already cover this ground.</td><td><span class="badge b-skip">Skip</span></td></tr>
+    <tr><td><b>ai-job-search</b>, <b>career-ops</b></td><td>Full AI job-hunting systems. Excellent engineering, zero overlap with running a SaaS company.</td><td><span class="badge b-skip">Skip</span></td></tr>
+  </table>
+
+  <h4>Observability, agents &amp; model routing</h4>
+  <table class="tbl">
+    <tr><th>Name</th><th>What it does &amp; why</th><th>Verdict</th></tr>
+    <tr><td><b>langfuse</b></td><td>See what your agents actually do in production. Becomes essential the moment Summit agents run unattended.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>promptfoo</b></td><td>Test and red-team the agents you build. Run this before QualifyOS ever touches a real client.</td><td><span class="badge b-use">Use</span></td></tr>
+    <tr><td><b>e2b</b></td><td>Secure sandbox for Claude to run its own code. Worth it when you eventually loosen the confirmation gates.</td><td><span class="badge b-opt">Optional</span></td></tr>
+    <tr><td><b>onlook</b></td><td>Visually edit your React UI while AI writes the code. Nice for design iteration on client sites.</td><td><span class="badge b-opt">Optional</span></td></tr>
+    <tr><td><b>mastra</b></td><td>Turn a Claude prototype into a real product. Relevant when QualifyOS Lite graduates from prototype.</td><td><span class="badge b-opt">Later</span></td></tr>
+    <tr><td><b>CCPlugins</b></td><td>Drop-in Claude Code commands that save real time. Low risk, browse and cherry-pick.</td><td><span class="badge b-opt">Optional</span></td></tr>
+    <tr><td><b>OmniRoute</b>, <b>litellm</b></td><td>One endpoint for many models with per-project spend tracking. Use <b>litellm</b> for your Summit backend agents — <i>not</i> to proxy Claude Code itself, which risks terms-of-service and reliability problems.</td><td><span class="badge b-opt">Backend only</span></td></tr>
+    <tr><td><b>ultracode</b></td><td>A creator-branded Claude Code feature from your screenshot. I could not verify substance beyond promotion. Wait until it proves itself.</td><td><span class="badge b-skip">Skip</span></td></tr>
+  </table>
+
+  <h4>Token &amp; cost discipline</h4>
+  <table class="tbl">
+    <tr><th>Name</th><th>What it does &amp; why</th><th>Verdict</th></tr>
+    <tr><td><b>Haiku routing</b></td><td>Route structured, simple agent tasks to Haiku and keep Sonnet for real reasoning. Already your winning pattern — it's baked into the CLAUDE.md blueprint.</td><td><span class="badge b-core">Core</span></td></tr>
+    <tr><td><b>JuliusBrussee/caveman</b></td><td>Cuts roughly 65% of <i>output</i> tokens by dropping filler while keeping code and errors byte-exact. Read the caveat below before installing.</td><td><span class="badge b-opt">Measure first</span></td></tr>
+  </table>
+
+  <div class="note red"><b>The honest numbers on caveman, from its own documentation:</b> it only shrinks <b>output</b> tokens. Input and reasoning tokens are untouched, and the skill itself adds roughly 1,000 to 1,500 input tokens per turn. On already-terse workloads it can go <b>net negative</b> on cost. Since you already route structured work to Haiku, you may be past the point where it saves money. The real win is speed and readability. Install it, measure a week, keep it only if the numbers agree.</div>
+
+  <div class="note green"><b>✅ Part 9 test:</b> ask Jarvis <i>"what skills do you have loaded and what can you do that you couldn't yesterday?"</i> It should name them and explain the new capabilities in plain English.</div>
+</section>
+
+<!-- PART 10 -->
+<section class="section reveal" id="p10">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Part 10</div></div>
+  </div>
+  <h2>Daily use, guardrails &amp; when things break</h2>
+  <p class="lede">The build is done. This part is what keeps it running well for years instead of degrading into something you stop trusting.</p>
+
+  <h3><span class="tagn">10.1</span>Your daily rhythm</h3>
+  <table class="tbl">
+    <tr><th>When</th><th>Say this</th><th>What happens</th></tr>
+    <tr><td><b>Morning</b></td><td>"Jarvis, brief me."</td><td>Calendar, important email, client count, agent health, running builds — in about 40 seconds.</td></tr>
+    <tr><td><b>Before a call</b></td><td>"Pull everything we know about [company]."</td><td>Searches your vault and CRM, gives you a one-minute prep.</td></tr>
+    <tr><td><b>Mid-day</b></td><td>"Start a build — [description]."</td><td>Scaffolds the project, shows you the plan, waits for your yes, then launches a Claude Code session.</td></tr>
+    <tr><td><b>From the airport</b></td><td>Text the Telegram bot</td><td>Same brain, same tools, from your pocket.</td></tr>
+    <tr><td><b>Driving</b></td><td>Call your Twilio number</td><td>PIN, then talk. Check status, queue work, capture ideas into the vault.</td></tr>
+    <tr><td><b>End of day</b></td><td>"Log today and tell me tomorrow's top three."</td><td>Writes to your Daily folder and sets your priorities.</td></tr>
+  </table>
+
+  <h3><span class="tagn">10.2</span>Weekly maintenance — 10 minutes, Friday</h3>
+  <ul class="clean">
+    <li><b>Read the logs.</b> Open <code>JarvisVault/Jarvis/logs/</code> and skim the week. You're looking for anything it did that surprised you.</li>
+    <li><b>Prune the memory.</b> Open <code>Jarvis/memory/</code> and delete facts that went stale. Wrong memories are worse than no memories.</li>
+    <li><b>Check your spend.</b> Anthropic console → Billing. Twilio console → Usage. Catch runaway costs while they're small.</li>
+    <li><b>Update the rules.</b> If Jarvis did something you didn't like, add a line to <code>rules.md</code>. That's how it learns permanently — not by you repeating yourself in chat.</li>
+  </ul>
+
+  <div class="note cyan"><b>The single most important habit:</b> when Jarvis misbehaves, fix <code>identity.md</code> or <code>rules.md</code> — never just correct it in conversation. Chat corrections evaporate. Vault corrections are permanent and survive every restart, update, and model change.</div>
+
+  <h3><span class="tagn">10.3</span>Troubleshooting — the things that actually go wrong</h3>
+  <table class="tbl">
+    <tr><th>Symptom</th><th>Cause &amp; fix</th></tr>
+    <tr><td><b>Jarvis hears itself and loops</b></td><td>Your mic is picking up the speakers. <b>Wear headphones.</b> This fixes it completely and is the most common complaint.</td></tr>
+    <tr><td><b>"Speech recognition not supported"</b></td><td>You're not in Chrome. Not Edge, not Firefox, not Brave, not Arc. Only Chrome has the Web Speech API.</td></tr>
+    <tr><td><b>No sound at all</b></td><td>Click once anywhere on the page. Chrome blocks audio until you interact with the page. It's a security feature, not a bug.</td></tr>
+    <tr><td><b>"credit balance too low" / HTTP 400</b></td><td>Your Anthropic credits ran out. Go to console.anthropic.com → Billing → add credits and enable auto-reload. No code change needed.</td></tr>
+    <tr><td><b>"running scripts is disabled"</b></td><td>Windows blocks PowerShell scripts by default. Run once: <code>Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned</code></td></tr>
+    <tr><td><b>"'python' is not recognized"</b></td><td>Python wasn't added to PATH during install. Reinstall Python and check the "Add python.exe to PATH" box on the first screen.</td></tr>
+    <tr><td><b>The orb doesn't appear</b></td><td>Backend isn't running or the port is wrong. Check window 1 for errors, and confirm <code>curl http://127.0.0.1:8765/health</code> responds.</td></tr>
+    <tr><td><b>Jarvis answers generically, no personality</b></td><td>It isn't loading your vault. Tell Claude Code: "load identity.md and rules.md from the vault into the system prompt on every request."</td></tr>
+    <tr><td><b>The phone number doesn't answer</b></td><td>Check the Twilio Console → Monitor → Logs → Errors. Usually the webhook URL is wrong or the Railway service is asleep.</td></tr>
+    <tr><td><b>An MCP server won't connect</b></td><td><code>claude mcp remove NAME</code> then add it again. If it persists, the package name may have changed — check its GitHub README.</td></tr>
+  </table>
+
+  <div class="note green"><b>The universal fix:</b> copy the entire red error text, paste it into Claude Code, and say <i>"this is the error I got, what does it mean and how do I fix it on Windows?"</i> It has full context on your project. This resolves the large majority of problems without you needing to understand the underlying cause.</div>
+
+  <h3><span class="tagn">10.4</span>Security checklist — review this monthly</h3>
+  <ul class="clean">
+    <li><b>Is <code>.env</code> in <code>.gitignore</code>?</b> Run <code>git status</code> in the Jarvis folder. If <code>.env</code> appears in the list, stop and fix it immediately.</li>
+    <li><b>Are keys only in the backend?</b> No key should ever appear in <code>overlay/</code> or any browser-facing file.</li>
+    <li><b>Is the phone PIN still enabled?</b> Call your own number and confirm it asks.</li>
+    <li><b>Is Twilio signature verification on?</b> Without it, anyone who finds your Railway URL can talk to your Jarvis.</li>
+    <li><b>Is the Telegram chat ID lock working?</b> Have a friend message your bot — it should ignore them entirely.</li>
+    <li><b>Are confirmation gates intact?</b> Ask Jarvis to send a test outreach message. If it sends without asking, that's a critical bug — fix before anything else.</li>
+  </ul>
+
+  <h3><span class="tagn">10.5</span>What to build next</h3>
+  <ul class="clean">
+    <li><b>QualifyOS Lite</b> — lead scoring plus a next-action agent on the infrastructure you now have. The smallest sellable slice, shippable to your nine existing clients.</li>
+    <li><b>Proactive Jarvis</b> — let it message you first when an agent fails, a lead scores above 80, or a build finishes.</li>
+    <li><b>Voice cloning</b> — ElevenLabs can clone a voice. Some people clone their own so Jarvis sounds like their inner monologue.</li>
+    <li><b>Screen awareness</b> — add screenshot analysis so you can ask "what am I looking at?" and get a real answer.</li>
+  </ul>
+</section>
+
+<!-- SHARE -->
+<section class="section reveal">
+  <div class="section-head">
+    <div class="mini-reactor"><div class="mr"></div><div class="mc"></div></div>
+    <div><div class="eyebrow">Appendix</div></div>
+  </div>
+  <h2>Sharing this with someone else</h2>
+  <p class="lede">You mentioned a friend who wants the same thing. This guide is already 95% generic — here's precisely what to change to make it theirs.</p>
+  <table class="tbl">
+    <tr><th>Find</th><th>Replace with</th></tr>
+    <tr><td><code>C:\Users\DanGi</code></td><td>Their Windows home folder. They find it with <code>echo $env:USERPROFILE</code></td></tr>
+    <tr><td><code>JarvisVault\Jarvis\identity.md</code></td><td>Their name, their business, their tone. This file is the entire personality.</td></tr>
+    <tr><td><code>JarvisVault\Summit\context.md</code></td><td>Their business context. Rename the folder to their company.</td></tr>
+    <tr><td>Part 8 entirely</td><td>Their own API endpoints, or skip Part 8 if they have no backend yet.</td></tr>
+    <tr><td>Everything else</td><td>Unchanged. Parts 0 through 7 and 9 through 10 work for anyone on Windows.</td></tr>
+  </table>
+  <div class="note cyan"><b>Tell them to start at Part 0 and not skip ahead.</b> Every part ends with a test for a reason — the failures people can't recover from are almost always caused by skipping a verification step and building three layers on top of something that was quietly broken.</div>
+</section>
+
+<!-- FINAL -->
+<section class="section reveal" style="text-align:center;border-top:1px solid var(--line);padding:80px 0 50px">
+  <div class="reactor" style="margin:0 auto 24px;transform:scale(.85)" aria-hidden="true">
+    <div class="ring r4"></div><div class="ring r3"></div><div class="ring r2"></div><div class="ring r1"></div><div class="core"></div>
+  </div>
+  <div class="eyebrow" style="justify-content:center">All systems nominal</div>
+  <h2 style="font-size:clamp(1.7rem,4.5vw,2.6rem);margin-top:14px">Start at Part 0. Finish Part 5 this weekend.</h2>
+  <p style="color:var(--muted);max-width:600px;margin:14px auto 0">A Jarvis you can actually talk to on Sunday night beats a perfect one you never finish. Parts 6 through 10 bolt onto a system that already works... and every one of them is optional.</p>
+  <div class="kv" style="max-width:640px;margin:30px auto 0">
+    <div class="cell"><div class="l">Parts 0–5</div><div class="v">ONE WEEKEND</div></div>
+    <div class="cell"><div class="l">Monthly cost</div><div class="v amber">~$10–30</div></div>
+    <div class="cell"><div class="l">Employees replaced</div><div class="v green">0</div></div>
+  </div>
+  <p style="color:var(--muted-2);max-width:600px;margin:18px auto 0;font-size:.86rem">That last number is deliberate. This isn't an employee... it's the operator layer that makes one person work like a team. Which is the more useful thing to have built.</p>
+</section>
+
+</div>
+
+<footer>
+  PROJECT JARVIS · The Complete Windows Build · assembled for Summit Voice AI<br>
+  Every repo, command and endpoint verified against live sources · July 2026
+</footer>
+
+<script>
+  // scroll reveal
+  const io = new IntersectionObserver((es)=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.08});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // typed hero line
+  (function(){
+    const el = document.getElementById('typed');
+    if(!el) return;
+    const lines = [
+      'INITIALIZING JARVIS PROTOCOL...',
+      'BRAIN: CLAUDE CODE ... ONLINE',
+      'MEMORY: OBSIDIAN VAULT ... MOUNTED',
+      'VOICE: ELEVENLABS ... READY',
+      'CHANNELS: DESK / TEXT / PHONE ... ARMED',
+      'AWAITING YOUR INSTRUCTIONS, SIR.'
+    ];
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      el.textContent = lines[lines.length-1]; return;
+    }
+    let li=0, ci=0, del=false;
+    (function tick(){
+      const cur = lines[li];
+      el.textContent = cur.slice(0, ci);
+      if(!del){
+        ci++;
+        if(ci>cur.length){
+          if(li===lines.length-1) return; // hold final line
+          return setTimeout(()=>{del=true;tick();}, 1400);
+        }
+        setTimeout(tick, 32);
+      } else {
+        ci--;
+        if(ci<=0){ del=false; li++; return setTimeout(tick, 220); }
+        setTimeout(tick, 14);
+      }
+    })();
+  })();
+
+  // ambient particle field behind hero
+  (function(){
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const hero = document.querySelector('.hero');
+    if(!hero) return;
+    const c = document.createElement('canvas');
+    c.style.cssText='position:absolute;inset:0;z-index:-1;pointer-events:none';
+    hero.style.position='relative';
+    hero.appendChild(c);
+    const ctx=c.getContext('2d'); let w,h,parts;
+    function size(){
+      w=c.width=hero.offsetWidth; h=c.height=hero.offsetHeight;
+      parts=Array.from({length:Math.min(80,Math.floor(w/16))},()=>({
+        x:Math.random()*w,y:Math.random()*h,
+        vx:(Math.random()-.5)*.26,vy:(Math.random()-.5)*.26,
+        r:Math.random()*1.7+.4
+      }));
+    }
+    size(); window.addEventListener('resize',size);
+    (function loop(){
+      ctx.clearRect(0,0,w,h);
+      for(let i=0;i<parts.length;i++){
+        const p=parts[i];
+        p.x+=p.vx; p.y+=p.vy;
+        if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,6.283);
+        ctx.fillStyle='rgba(59,232,255,'+(.14+p.r*.13)+')'; ctx.fill();
+        for(let j=i+1;j<parts.length;j++){
+          const q=parts[j], dx=p.x-q.x, dy=p.y-q.y, d=dx*dx+dy*dy;
+          if(d<9000){
+            ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y);
+            ctx.strokeStyle='rgba(59,232,255,'+(0.05*(1-d/9000))+')';
+            ctx.lineWidth=1; ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(loop);
+    })();
+  })();
+</script>
+</body>
+</html>

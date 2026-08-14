@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Jarvis — Windows Build Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070B14;
+    --bg-2:#0A1020;
+    --panel:#0E1626;
+    --panel-2:#111C30;
+    --line:#1B2942;
+    --line-bright:#26405f;
+    --cyan:#3BE8FF;
+    --cyan-dim:#1d9fb8;
+    --amber:#FFB020;
+    --green:#41F5A0;
+    --red:#FF6B6B;
+    --text:#E7EEFA;
+    --muted:#8DA0BF;
+    --muted-2:#5F718F;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.65;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ambient HUD grid + glow */
+  body::before{
+    content:"";
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(1200px 700px at 78% -8%, rgba(59,232,255,.10), transparent 60%),
+      radial-gradient(900px 600px at 8% 12%, rgba(255,176,32,.06), transparent 55%),
+      linear-gradient(transparent 96%, rgba(59,232,255,.05) 96%) 0 0/100% 34px,
+      linear-gradient(90deg, transparent 96%, rgba(59,232,255,.05) 96%) 0 0/34px 100%;
+  }
+
+  .wrap{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:0 22px}
+
+  /* ---------- type ---------- */
+  h1,h2,h3,h4,.dsp{font-family:'Chakra Petch',sans-serif;letter-spacing:.5px}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--cyan);display:inline-flex;align-items:center;gap:10px;
+  }
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--cyan);opacity:.7}
+  .mono{font-family:'JetBrains Mono',monospace}
+
+  /* ---------- HERO ---------- */
+  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:70px 22px 50px;position:relative}
+  .reactor{position:relative;width:230px;height:230px;margin-bottom:6px;display:grid;place-items:center}
+  .reactor .core{
+    position:absolute;width:64px;height:64px;border-radius:50%;
+    background:radial-gradient(circle at 50% 45%, #eafffb 0%, var(--cyan) 38%, var(--cyan-dim) 70%, transparent 72%);
+    box-shadow:0 0 40px 8px rgba(59,232,255,.65),0 0 90px 22px rgba(59,232,255,.28);
+    animation:pulse 3.4s ease-in-out infinite;
+  }
+  .ring{position:absolute;border-radius:50%;border:1px solid rgba(59,232,255,.35)}
+  .ring.r1{width:110px;height:110px;border-style:dashed;animation:spin 14s linear infinite}
+  .ring.r2{width:158px;height:158px;border-color:rgba(59,232,255,.22);animation:spin 22s linear infinite reverse}
+  .ring.r3{width:206px;height:206px;border-color:rgba(255,176,32,.20);border-top-color:rgba(255,176,32,.6);animation:spin 30s linear infinite}
+  .ring.r4{width:230px;height:230px;border-color:rgba(59,232,255,.10)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.86}}
+
+  .hero h1{font-size:clamp(2.6rem,8vw,5.2rem);font-weight:700;line-height:.98;margin:14px 0 4px}
+  .hero h1 .glow{color:var(--cyan);text-shadow:0 0 26px rgba(59,232,255,.55)}
+  .hero .tag{font-family:'JetBrains Mono',monospace;color:var(--muted);max-width:620px;margin:14px auto 0;font-size:.98rem}
+  .status-bar{
+    margin-top:34px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--muted)
+  }
+  .chip{border:1px solid var(--line-bright);border-radius:999px;padding:6px 13px;background:rgba(14,22,38,.6);display:inline-flex;gap:8px;align-items:center}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  .dot.amber{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+  .dot.cyan{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+  .scrollcue{margin-top:46px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted-2);letter-spacing:.2em;animation:bob 2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0);opacity:.6}50%{transform:translateY(6px);opacity:1}}
+
+  /* ---------- sections ---------- */
+  .section{padding:78px 0;border-top:1px solid var(--line)}
+  .section h2{font-size:clamp(1.7rem,4vw,2.6rem);font-weight:700;margin:14px 0 10px;line-height:1.05}
+  .section .lede{color:var(--muted);max-width:720px;font-size:1.05rem;margin-bottom:8px}
+  .section h3{font-size:1.15rem;margin:26px 0 8px;color:var(--text)}
+
+  .reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  /* panels */
+  .panel{position:relative;background:linear-gradient(180deg,var(--panel),var(--bg-2));border:1px solid var(--line);border-radius:14px;padding:24px}
+  .panel::before,.panel::after{content:"";position:absolute;width:14px;height:14px;border:2px solid var(--cyan);opacity:.55}
+  .panel::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+  .panel::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:820px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+  /* architecture cards */
+  .layer{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px}
+  .layer .k{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan)}
+  .layer h4{font-size:1.06rem;margin:6px 0 6px}
+  .layer p{color:var(--muted);font-size:.9rem}
+  .layer .tools{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}
+  .tt{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text);background:rgba(59,232,255,.08);border:1px solid var(--line-bright);border-radius:6px;padding:3px 7px}
+
+  /* roadmap stages */
+  .stage{display:grid;grid-template-columns:64px 1fr;gap:18px;padding:20px 0;border-bottom:1px dashed var(--line)}
+  .stage:last-child{border-bottom:0}
+  .stage .num{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:1.9rem;color:var(--cyan);border:1px solid var(--line-bright);border-radius:12px;width:64px;height:64px;display:grid;place-items:center;background:var(--panel);text-shadow:0 0 16px rgba(59,232,255,.4)}
+  .stage h4{font-size:1.15rem;margin-bottom:4px}
+  .stage .when{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--amber);letter-spacing:.14em;text-transform:uppercase}
+  .stage p{color:var(--muted);font-size:.94rem;margin-top:6px}
+  .stage ul{margin:8px 0 0 0;padding-left:18px;color:var(--muted);font-size:.9rem}
+  .stage li{margin:3px 0}
+
+  /* steps (setup) */
+  ol.steps{list-style:none;counter-reset:s;display:grid;gap:12px}
+  ol.steps li{counter-increment:s;position:relative;padding:14px 16px 14px 54px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+  ol.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;left:16px;top:14px;font-family:'JetBrains Mono',monospace;color:var(--cyan);font-size:.85rem}
+  ol.steps b{color:var(--text)}
+
+  /* code */
+  pre{background:#060B15;border:1px solid var(--line);border-radius:10px;padding:16px 16px;overflow:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.6;color:#cfe6ff}
+  pre .c{color:#5f718f}
+  pre .k{color:var(--amber)}
+  pre .s{color:var(--green)}
+  code{font-family:'JetBrains Mono',monospace;background:rgba(59,232,255,.09);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:.85em;color:#bfe9ff}
+
+  /* catalog */
+  .cat-group{margin-top:26px}
+  .cat-group>h3{display:flex;align-items:center;gap:12px;font-size:1.02rem;letter-spacing:.04em;color:var(--text);margin-bottom:12px}
+  .cat-group>h3 span{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:2px 8px}
+  .repo{display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:start;padding:13px 15px;border:1px solid var(--line);border-radius:10px;background:var(--panel);margin-bottom:9px}
+  .repo .name{font-family:'JetBrains Mono',monospace;font-size:.86rem;color:var(--cyan)}
+  .repo .desc{color:var(--muted);font-size:.86rem;grid-column:1/2}
+  .repo .why{color:var(--text);font-size:.84rem;grid-column:1/2;opacity:.92}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.1em;padding:4px 9px;border-radius:6px;height:fit-content;white-space:nowrap;text-transform:uppercase;font-weight:700}
+  .b-use{background:rgba(65,245,160,.12);color:var(--green);border:1px solid rgba(65,245,160,.35)}
+  .b-opt{background:rgba(255,176,32,.12);color:var(--amber);border:1px solid rgba(255,176,32,.35)}
+  .b-skip{background:rgba(255,107,107,.10);color:var(--red);border:1px solid rgba(255,107,107,.30)}
+  .b-core{background:rgba(59,232,255,.14);color:var(--cyan);border:1px solid rgba(59,232,255,.4)}
+
+  /* callout */
+  .note{border-left:3px solid var(--amber);background:rgba(255,176,32,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:16px 0;font-size:.92rem;color:var(--text)}
+  .note.cyan{border-left-color:var(--cyan);background:rgba(59,232,255,.06)}
+  .note.red{border-left-color:var(--red);background:rgba(255,107,107,.06)}
+  .note b{color:var(--amber)}
+  .note.cyan b{color:var(--cyan)}
+  .note.red b{color:var(--red)}
+
+  .kv{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .kv .cell{flex:1;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .kv .cell .l{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .kv .cell .v{font-family:'Chakra Petch',sans-serif;font-size:1.35rem;color:var(--cyan);margin-top:2px}
+  .kv .cell .v.amber{color:var(--amber)}
+
+  ul.clean{list-style:none;padding:0;display:grid;gap:9px}
+  ul.clean li{padding-left:26px;position:relative;color:var(--muted);font-size:.94rem}
+  ul.clean li::before{content:"▸";position:absolute;left:6px;color:var(--cyan)}
+  ul.clean li b{color:var(--text)}
+
+  .final{text-align:center;padding:70px 0 40px}
+  .final .reactor{margin:0 auto 22px;transform:scale(.7)}
+  footer{border-top:1px solid var(--line);padding:26px 0;text-align:center;color:var(--muted-2);font-family:'JetBrains Mono',monospace;font-size:.72rem}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none!important;transition:none!important}
+    .reveal{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="reactor" aria-hidden="true">
+    <div class="ring r4"></div>
+    <div class="ring r3"></div>
+    <div class="ring r2"></div>
+    <div class="ring r1"></div>
+    <div class="core"></div>
+  </div>
+  <div class="eyebrow">Personal AI Operator · Windows Build</div>
+  <h1>PROJECT <span class="glow">JARVIS</span></h1>
+  <p class="tag">One AI that lives on your machine. Talk to it at your desk. Text it. Call it a real phone number from anywhere. It reads your files, calendar and email, ships builds, and runs Summit OS while you sleep.</p>
+  <div class="status-bar">
+    <span class="chip"><span class="dot"></span>BRAIN · Claude Code</span>
+    <span class="chip"><span class="dot cyan"></span>MEMORY · Obsidian Vault</span>
+    <span class="chip"><span class="dot amber"></span>VOICE · ElevenLabs + Groq</span>
+    <span class="chip"><span class="dot"></span>PHONE · Twilio + Happy</span>
+  </div>
+  <div class="scrollcue">▼ SCROLL TO INITIALIZE</div>
+</header>
+
+<div class="wrap">
+
+<!-- BRIEF -->
+<section class="section reveal">
+  <div class="eyebrow">Read this first</div>
+  <h2>What this is — and what it isn't</h2>
+  <p class="lede">You asked for the last employee you'll ever need. Here's the honest version of that, so you build on solid ground instead of hype.</p>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="panel">
+      <h3 style="margin-top:0;color:var(--green)">What Jarvis genuinely becomes</h3>
+      <ul class="clean">
+        <li><b>A single orchestration layer</b> over Claude Code, your files, calendar, email, and Summit OS.</li>
+        <li><b>Reachable three ways</b> — desk voice, phone text, and a real inbound phone call.</li>
+        <li><b>An executor</b> — it starts builds, drafts proposals, scrapes leads, checks build status, schedules events, writes to your vault.</li>
+        <li><b>Persistent</b> — it remembers across sessions through your Obsidian vault + a memory engine.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3 style="margin-top:0;color:var(--amber)">Where to stay clear-eyed</h3>
+      <ul class="clean">
+        <li><b>I can't install it on your PC from here.</b> I'm sandboxed. This guide + the <code>CLAUDE.md</code> blueprint is what Claude Code on <i>your</i> Windows box executes.</li>
+        <li><b>It is not fully autonomous.</b> Anything that spends money or sends outreach keeps you in the loop — by design, not limitation.</li>
+        <li><b>"Call from anywhere" = Twilio.</b> Telegram/Happy give phone control &amp; texting; a real dial-in number is Twilio Voice.</li>
+        <li><b>No repo named "grapify" exists.</b> You're thinking of <code>gitingest</code> / <code>repomix</code>. Both are in the catalog below.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note cyan"><b>The build strategy:</b> this is staged on purpose. Trying to wire voice + phone + overlay + 40 skills + Summit OS in one sitting is exactly the QualifyOS failure mode — conflating distinct products into one launch. We ship the simplest working Jarvis first, then bolt on channels. Stage 1 is doable this weekend.</div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="section reveal">
+  <div class="eyebrow">System architecture</div>
+  <h2>Four layers: Brain, Senses, Hands, Channels</h2>
+  <p class="lede">Every capability you listed slots into one of these. The brain is Claude Code. Everything else plugs into it through MCP servers and your existing Railway backend.</p>
+
+  <div class="grid g2" style="margin-top:22px">
+    <div class="layer">
+      <div class="k">01 · The Brain</div>
+      <h4>Claude Code (the reasoning core)</h4>
+      <p>Runs locally, reads a <code>CLAUDE.md</code> master file, holds identity + rules, calls tools, spawns builds. Codex sits alongside as a second coding engine.</p>
+      <div class="tools"><span class="tt">claude-code</span><span class="tt">codex</span><span class="tt">CLAUDE.md</span><span class="tt">mem0</span></div>
+    </div>
+    <div class="layer">
+      <div class="k">02 · The Senses</div>
+      <h4>What Jarvis can perceive</h4>
+      <p>Your vault, calendar, email, screen, the web, and your OS process/build state. Read access first; write access gated.</p>
+      <div class="tools"><span class="tt">obsidian-mcp</span><span class="tt">gcal-mcp</span><span class="tt">gmail-mcp</span><span class="tt">chrome-devtools-mcp</span><span class="tt">context7</span></div>
+    </div>
+    <div class="layer">
+      <div class="k">03 · The Hands</div>
+      <h4>What Jarvis can do</h4>
+      <p>Run terminal commands, edit code precisely, drive a browser, build sites/PDFs/decks, dispatch Summit OS jobs.</p>
+      <div class="tools"><span class="tt">desktop-commander</span><span class="tt">serena</span><span class="tt">playwright-mcp</span><span class="tt">summit-railway-api</span></div>
+    </div>
+    <div class="layer">
+      <div class="k">04 · The Channels</div>
+      <h4>How you reach it</h4>
+      <p>Desk voice via the orb overlay, texting via Telegram/SMS, and inbound calls via a Twilio number routed to your Railway brain.</p>
+      <div class="tools"><span class="tt">electron-overlay</span><span class="tt">groq-whisper</span><span class="tt">elevenlabs</span><span class="tt">twilio-relay</span><span class="tt">happy</span></div>
+    </div>
+  </div>
+
+  <h3>The signal flow</h3>
+  <pre><span class="c"># DESK    </span> you speak → Groq Whisper (ears) → Claude brain + tools → ElevenLabs (voice) → orb reacts
+<span class="c"># PHONE   </span> Twilio number → ConversationRelay (STT/TTS) → Railway backend → Claude brain → actions
+<span class="c"># TEXT    </span> Telegram bot / Twilio SMS → Railway webhook → Claude brain → reply + task
+<span class="c"># REMOTE  </span> Happy app on phone → controls your live Claude Code session → watch builds run
+<span class="c"># MEMORY  </span> every turn ⇄ Obsidian vault (source of truth) + mem0 (fast recall)</pre>
+  <div class="note cyan"><b>Key architectural win you already have:</b> the phone brain runs on your <b>Railway FastAPI backend</b> (always-on), not your local PC. Your laptop can sleep and Jarvis still answers the phone. Local machine connects in for builds and file access.</div>
+</section>
+
+<!-- ROADMAP -->
+<section class="section reveal">
+  <div class="eyebrow">The build roadmap</div>
+  <h2>Five stages, shipped in order</h2>
+  <p class="lede">Each stage is independently useful. Stop at any point and you still have a working Jarvis — later stages just add reach and power.</p>
+
+  <div style="margin-top:16px">
+    <div class="stage">
+      <div class="num">1</div>
+      <div>
+        <div class="when">This weekend · ~3–4 hrs</div>
+        <h4>Core brain + memory + the orb</h4>
+        <p>The minimum lovable Jarvis: talk to it at your desk, it answers in voice, remembers via your vault, and can already read files, calendar and email.</p>
+        <ul>
+          <li>Install Node, Python, VS Code, Claude Code + Codex on Windows</li>
+          <li>Clone the Jarvis base, feed it the Windows <code>CLAUDE.md</code> below</li>
+          <li>Wire Obsidian vault as memory + Groq (ears) + ElevenLabs (voice)</li>
+          <li>Stand up the Electron arc-reactor overlay (transparent, always-on-top)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="num">2</div>
+      <div>
+        <div class="when">Week 1</div>
+        <h4>Hands: builds, browser, OS awareness</h4>
+        <p>Now it does things. "What's in the works?" reads your build/process state. "Build me a landing page" spawns a Claude Code session. It can drive Chrome and edit code precisely.</p>
+        <ul>
+          <li>Add Desktop Commander + Serena (precise code hands)</li>
+          <li>Add Playwright + chrome-devtools MCP (browser + QA)</li>
+          <li>Wire the "build status / start build" dispatcher to Claude Code sessions</li>
+        </ul>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="num">3</div>
+      <div>
+        <div class="when">Week 2</div>
+        <h4>Phone: text it &amp; call it from anywhere</h4>
+        <p>The Iron Man moment. Install Happy for phone control + voice. Stand up a Telegram bot for texting. Then the real one: a Twilio number that routes into your Railway brain.</p>
+        <ul>
+          <li>Happy app → control Claude Code + realtime voice from your phone</li>
+          <li>Telegram bot (free) for texting Jarvis; Twilio SMS optional</li>
+          <li>Twilio Voice number → ConversationRelay → Railway → Claude brain</li>
+        </ul>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="num">4</div>
+      <div>
+        <div class="when">Week 3</div>
+        <h4>Summit OS integration</h4>
+        <p>Jarvis gets keys to the empire. It hits your existing Railway endpoints to scrape leads, build demo sites, check the outreach feed, draft proposals with Claude skills, and report MRR movement.</p>
+        <ul>
+          <li>Expose <code>/dispatch</code>, <code>/clients</code>, <code>/agents/status</code>, <code>/analytics/activity-feed</code> as Jarvis tools</li>
+          <li>Proposal + website + PDF generation via Claude document skills</li>
+          <li>GHL / Apollo actions behind confirmation gates</li>
+        </ul>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="num">5</div>
+      <div>
+        <div class="when">Ongoing</div>
+        <h4>Skills brain + observability + cost discipline</h4>
+        <p>Load the skill libraries into Jarvis's brain, add prod observability, and tune token spend. This is where the catalog below gets installed — deliberately, not all at once.</p>
+        <ul>
+          <li>Install the USE-tier skills (Stage 5 catalog)</li>
+          <li>Langfuse + promptfoo for agent observability + testing</li>
+          <li>Token discipline: Haiku routing, gitingest/repomix, caveman (with caveats)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WINDOWS SETUP -->
+<section class="section reveal">
+  <div class="eyebrow">Stage 1 · Windows foundation</div>
+  <h2>Get the machine ready</h2>
+  <p class="lede">Your uploaded guide was Mac-only (it's from <code>ethanplusai/jarvis</code>). This is the Windows-native path — PowerShell, VS Code, Claude Code. No WSL required, though it's an option.</p>
+
+  <ol class="steps">
+    <li><b>Install Node.js LTS</b> from nodejs.org (gives you <code>npm</code>). Then in PowerShell confirm: <code>node -v</code></li>
+    <li><b>Install Python 3.12+</b> from python.org — check "Add to PATH" during install. Confirm: <code>python --version</code></li>
+    <li><b>Install VS Code</b> + the "Claude Code" and "Python" extensions.</li>
+    <li><b>Install Claude Code:</b> <code>npm install -g @anthropic-ai/claude-code</code> then run <code>claude</code> once to sign in.</li>
+    <li><b>Install Codex</b> (your second engine) per its CLI docs, so Jarvis can route heavy coding either way.</li>
+    <li><b>Install Obsidian</b> from obsidian.md. Create a vault at <code>C:\Users\DanGi\JarvisVault</code> — this becomes Jarvis's long-term memory.</li>
+    <li><b>Create the project folder:</b> <code>mkdir C:\Users\DanGi\Jarvis</code> and drop the <code>CLAUDE.md</code> blueprint (below) inside it.</li>
+    <li><b>Run Claude Code in that folder:</b> <code>cd C:\Users\DanGi\Jarvis</code> then <code>claude</code>. It reads <code>CLAUDE.md</code> and builds the whole project.</li>
+  </ol>
+
+  <div class="note"><b>PowerShell tip:</b> if global npm installs error on permissions, run PowerShell as admin once, or set a user npm prefix: <code>npm config set prefix "$env:APPDATA\npm"</code>. Windows Defender may prompt on the Electron overlay's always-on-top window — allow it.</div>
+</section>
+
+<!-- BASE REPO -->
+<section class="section reveal">
+  <div class="eyebrow">Choosing the base</div>
+  <h2>Which Jarvis repo to start from</h2>
+  <p class="lede">I compared the live options. None are perfectly Windows-native, so the blueprint borrows the best of each: the architecture from Ethan's, the orb from qartex, ported to an Electron overlay that Windows handles natively.</p>
+
+  <div class="repo">
+    <div><div class="name">ethanplusai/jarvis</div><div class="desc">The origin of the doc you uploaded. Voice-first, audio-reactive particle orb, Calendar/Mail/Notes, spawns Claude Code builds, <code>CLAUDE.md</code>-driven setup. macOS.</div><div class="why"><b>Use as the architecture template.</b> Its <code>CLAUDE.md</code> approach is exactly right — we port the AppleScript bits to Windows (PowerShell + Graph/Outlook).</div></div>
+    <span class="badge b-core">Template</span>
+  </div>
+  <div class="repo">
+    <div><div class="name">qartex/jarvis-desktop</div><div class="desc">Iron Man build with a GLSL/Three.js 2,400-particle orb that changes color by state (idle/thinking/listening/error), always-on-top overlay, browser control, Playwright, SQLite memory. macOS + Linux.</div><div class="why"><b>Steal the orb + state model.</b> The blue/orange/green/red state coloring is the "moves when it talks" effect you want.</div></div>
+    <span class="badge b-use">Orb source</span>
+  </div>
+  <div class="repo">
+    <div><div class="name">mkr-infinity/jarvis</div><div class="desc">Cross-platform (Windows!) Electron + FastAPI + vanilla JS, arc-reactor UI, screen capture + analysis, model switching, runs locally.</div><div class="why"><b>Reference for the Windows Electron shell.</b> Proves the transparent always-on-top overlay works on Windows without native Swift.</div></div>
+    <span class="badge b-opt">Windows ref</span>
+  </div>
+  <div class="repo">
+    <div><div class="name">rezaulhreza/jarvis</div><div class="desc">Local-first, Ollama-powered, "floating orb," voice mode with waveform, dynamic skills (builds its own tools), strong identity system.</div><div class="why"><b>Reference for dynamic-skill creation</b> — the "Jarvis writes its own skills" pattern, if you want it later.</div></div>
+    <span class="badge b-opt">Ideas</span>
+  </div>
+</section>
+
+<!-- MEMORY -->
+<section class="section reveal">
+  <div class="eyebrow">The memory layer</div>
+  <h2>Obsidian as Jarvis's brain-on-disk</h2>
+  <p class="lede">Your vault is the source of truth — human-readable, versionable, yours forever. A memory engine sits on top for fast recall. This is how Jarvis remembers "the deploy is Friday" three weeks later.</p>
+
+  <div class="grid g2" style="margin-top:18px">
+    <div class="panel">
+      <h3 style="margin-top:0">Vault access — pick one</h3>
+      <ul class="clean">
+        <li><b>Filesystem (simplest):</b> the vault is just a markdown folder. Claude Code + Desktop Commander already read/write it directly. Zero setup.</li>
+        <li><b>StevenStavrakis/obsidian-mcp:</b> <code>npx</code>, direct filesystem, structured note tools. No plugin needed.</li>
+        <li><b>MarkusPfundstein/mcp-obsidian:</b> the most-used server. Needs the Obsidian "Local REST API" plugin + key. Richest tools (search, patch, daily notes).</li>
+      </ul>
+      <div class="note cyan" style="margin-bottom:0"><b>Recommendation:</b> start Filesystem for Stage 1, upgrade to <code>mcp-obsidian</code> in Stage 5 when you want structured search.</div>
+    </div>
+    <div class="panel">
+      <h3 style="margin-top:0">Recall engine — on top of the vault</h3>
+      <ul class="clean">
+        <li><b>mem0:</b> cross-session memory layer. Structured "remember this fact" recall. The standard pick.</li>
+        <li><b>supermemory:</b> fast local memory engine, runs fully local. Good privacy-first alternative.</li>
+        <li><b>Your existing Supabase:</b> can back a memory table too, with your RLS pattern.</li>
+      </ul>
+      <div class="note" style="margin-bottom:0"><b>Vault structure to seed:</b> <code>/Jarvis/identity.md</code>, <code>/Jarvis/rules.md</code>, <code>/Jarvis/memory/</code>, <code>/Summit/clients.md</code>, <code>/Summit/playbook.md</code>. Everything from your 18 screenshots + Sales Playbook goes into <code>/Jarvis/knowledge/</code>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CHANNELS -->
+<section class="section reveal">
+  <div class="eyebrow">The three channels</div>
+  <h2>Desk · Text · Call</h2>
+  <p class="lede">This is the part you care about most. Each channel is a real, verified path — not a maybe.</p>
+
+  <div class="grid g3" style="margin-top:20px">
+    <div class="layer">
+      <div class="k">Channel A · At your desk</div>
+      <h4>Speak &amp; the orb answers</h4>
+      <p>The Electron overlay floats always-on-top. You talk, Groq Whisper transcribes free, Claude thinks, ElevenLabs speaks in a British-butler voice, and the particle orb shifts color as it listens/thinks/talks.</p>
+      <div class="tools"><span class="tt">electron</span><span class="tt">groq-whisper</span><span class="tt">elevenlabs</span><span class="tt">three.js orb</span></div>
+    </div>
+    <div class="layer">
+      <div class="k">Channel B · From your phone</div>
+      <h4>Text it &amp; control builds</h4>
+      <p><b>Happy</b> (slopus/happy, 19k⭐) mirrors your Claude Code session to your phone with realtime voice and push notifications — watch a build run from a coffee shop. Add a <b>Telegram bot</b> for plain texting (free), or Twilio SMS.</p>
+      <div class="tools"><span class="tt">slopus/happy</span><span class="tt">telegram-bot</span><span class="tt">twilio-sms</span></div>
+    </div>
+    <div class="layer">
+      <div class="k">Channel C · Call from anywhere</div>
+      <h4>A real phone number</h4>
+      <p>A Twilio Voice number → <b>ConversationRelay</b> (Twilio does the STT/TTS, killing the latency problem) → your Railway backend → Claude brain with tools. Call it from any phone on earth and have it run operations.</p>
+      <div class="tools"><span class="tt">twilio-voice</span><span class="tt">conversation-relay</span><span class="tt">railway-fastapi</span></div>
+    </div>
+  </div>
+
+  <div class="note cyan"><b>Why ConversationRelay matters:</b> the hard part of phone AI is getting the speak→think→speak loop under ~1.5s or it feels broken. ConversationRelay handles speech-to-text and text-to-speech inside Twilio, so your backend only trades text with Claude. You skip the Deepgram/ElevenLabs streaming plumbing entirely. There's an official Twilio × Claude ConversationRelay tutorial to follow.</div>
+
+  <div class="kv">
+    <div class="cell"><div class="l">Twilio number</div><div class="v amber">~$1<span style="font-size:.8rem">/mo</span></div></div>
+    <div class="cell"><div class="l">Voice usage</div><div class="v amber">~$0.014<span style="font-size:.8rem">/min</span></div></div>
+    <div class="cell"><div class="l">Groq STT (desk)</div><div class="v">FREE</div></div>
+    <div class="cell"><div class="l">Happy relay</div><div class="v">FREE</div></div>
+    <div class="cell"><div class="l">Telegram bot</div><div class="v">FREE</div></div>
+  </div>
+</section>
+
+<!-- SUMMIT OS -->
+<section class="section reveal">
+  <div class="eyebrow">Stage 4 · The empire connection</div>
+  <h2>Jarvis runs Summit OS</h2>
+  <p class="lede">This is where it stops being a toy and becomes an operator. Jarvis gets tools that hit the Railway endpoints you already built — behind confirmation gates for anything that spends or sends.</p>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="panel">
+      <h3 style="margin-top:0">Read/report tools (auto-run)</h3>
+      <ul class="clean">
+        <li><b>"What's the outreach doing?"</b> → <code>/analytics/activity-feed</code></li>
+        <li><b>"How many active clients?"</b> → <code>/clients</code></li>
+        <li><b>"Are the agents healthy?"</b> → <code>/agents/status</code></li>
+        <li><b>"What builds are running?"</b> → OS process + Claude Code session state</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3 style="margin-top:0">Action tools (gated · confirm first)</h3>
+      <ul class="clean">
+        <li><b>"Scrape Denver roofers"</b> → Apollo scraper dispatch</li>
+        <li><b>"Build a demo for this lead"</b> → demo machine + <code>/dispatch</code></li>
+        <li><b>"Draft a proposal for X"</b> → Claude doc skills → PDF</li>
+        <li><b>"Queue this week's content"</b> → Buffer / GHL workflows</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note red"><b>Non-negotiable guardrail:</b> every tool that sends email/SMS, spends API credits, or posts publicly must return a preview and wait for your yes. A solo founder's reputation and CRM of 315k contacts is not something an agent gets to touch unsupervised. This is the difference between leverage and a disaster.</div>
+</section>
+
+<!-- CATALOG -->
+<section class="section reveal">
+  <div class="eyebrow">Every repo &amp; skill from your 18 screenshots</div>
+  <h2>The full catalog, with a verdict on each</h2>
+  <p class="lede">You asked me to list every one — used or not — with what it does and why it's in or out. Badges: <span class="badge b-core" style="font-size:.6rem">CORE</span> load-bearing · <span class="badge b-use" style="font-size:.6rem">USE</span> install it · <span class="badge b-opt" style="font-size:.6rem">OPTIONAL</span> nice-to-have · <span class="badge b-skip" style="font-size:.6rem">SKIP</span> not for you.</p>
+
+  <!-- brain -->
+  <div class="cat-group">
+    <h3>Core brain &amp; harness <span>the runtime</span></h3>
+    <div class="repo"><div><div class="name">anthropic · Claude Code</div><div class="why">The reasoning core. Everything else plugs into it.</div></div><span class="badge b-core">Core</span></div>
+    <div class="repo"><div><div class="name">slopus/happy</div><div class="why">Phone/web client for Claude Code + Codex, realtime voice, E2E encrypted. Your "control builds from anywhere" layer. Verified, 19k⭐.</div></div><span class="badge b-core">Core</span></div>
+    <div class="repo"><div><div class="name">wonderwhy-er/DesktopCommanderMCP</div><div class="why">Terminal + file control for Claude. The "makes Claude do stuff" MCP. Extends control esp. for Claude Desktop/Codex hosts.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">oraios/serena</div><div class="why">Semantic code toolkit via LSP — precise, surgical edits instead of blind rewrites. Makes "build me X" reliable.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">ECC (Enhance Claude Code)</div><div class="why">One harness tuning CC skills, instincts, memory, security. Powerful but opinionated — adopt once the basics are stable.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">ultracode</div><div class="why">A creator-branded CC skin/feature (screenshot 13). Couldn't verify substance beyond promo. Skip until it proves itself.</div></div><span class="badge b-skip">Skip</span></div>
+  </div>
+
+  <!-- memory -->
+  <div class="cat-group">
+    <h3>Memory <span>remember across sessions</span></h3>
+    <div class="repo"><div><div class="name">Obsidian + mcp-obsidian / obsidian-mcp</div><div class="why">Your vault = source-of-truth memory. Human-readable, versionable. The backbone of the whole memory story.</div></div><span class="badge b-core">Core</span></div>
+    <div class="repo"><div><div class="name">mem0</div><div class="why">Cross-session recall engine. "Remember the deploy is Friday" → surfaced weeks later. On every image's must-install list for a reason.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">supermemory</div><div class="why">Fast, fully-local memory engine. Privacy-first alternative to mem0 — pick one, not both.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">repomix</div><div class="why">Packs a whole repo into one prompt. Essential when Jarvis works on your Summit codebase.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">gitingest</div><div class="why">Swap <code>hub</code>→<code>ingest</code> in any GitHub URL, get the repo as one prompt. The "grapify" you were thinking of. Free utility.</div></div><span class="badge b-use">Use</span></div>
+  </div>
+
+  <!-- skills -->
+  <div class="cat-group">
+    <h3>Skill libraries <span>load into the brain · Stage 5</span></h3>
+    <div class="repo"><div><div class="name">anthropics/skills</div><div class="why">The official library, every SKILL.md Claude Code loads. Baseline.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">obra/superpowers</div><div class="why">The agentic skills framework everyone forks (244k⭐). Turns one-off prompts into reusable skills + a real dev method.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">mattpocock/skills</div><div class="why">Battle-tested TypeScript + dev-workflow skills. Directly relevant — you ship React/TS/Next.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">ui-ux-pro-max</div><div class="why">Turns Claude into a senior product designer. High leverage for your demo machine + website builds.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">sanyuan-skills</div><div class="why">Expert code-review skill — SOLID, security, edge cases before you ship. Solo-founder safety net.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">Vercel agent-browser</div><div class="why">Claude clicks and tests your app in a real browser. QA for demo sites before outreach.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">karpathy-skills</div><div class="why">Makes Claude reason from first principles / avoid common LLM failure modes. Cheap reasoning upgrade.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">scientific-agent-skills</div><div class="why">Research/data/writing science skills. Useful for trend research, not core to roofing SaaS.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">awesome-claude-skills / -code / -agents</div><div class="why">Master directories. Keep as reference indexes to pull from, not bulk-install.</div></div><span class="badge b-opt">Reference</span></div>
+    <div class="repo"><div><div class="name">Claude-Code-Game-Studios</div><div class="why">49 agents + 72 skills for building games. Impressive, irrelevant to your business.</div></div><span class="badge b-skip">Skip</span></div>
+  </div>
+
+  <!-- spec/workflow -->
+  <div class="cat-group">
+    <h3>Spec-driven dev &amp; task orchestration <span>build QualifyOS right</span></h3>
+    <div class="repo"><div><div class="name">spec-kit</div><div class="why">Claude writes the full spec before any code. This is the antidote to the QualifyOS "everything at once" stall. Pick this one.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">claude-task-master</div><div class="why">Breaks big work into shippable tasks it actually finishes. Pairs perfectly with spec-kit.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">claude-code-spec-workflow / get-shit-done</div><div class="why">Alternative spec-driven systems (requirements→design→tasks→code). Redundant with spec-kit — don't stack all three.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">awesome-claude-agents</div><div class="why">A full orchestrated dev team of subagents. Powerful for parallel builds once you're comfortable.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">claude-code-templates / claude-code-workflows / claude-plugins-official</div><div class="why">Configure/monitor CC + battle-tested configs + Anthropic's vetted marketplace. Reference + light install.</div></div><span class="badge b-opt">Optional</span></div>
+  </div>
+
+  <!-- mcp tools -->
+  <div class="cat-group">
+    <h3>MCP tools <span>senses &amp; hands</span></h3>
+    <div class="repo"><div><div class="name">upstash/context7</div><div class="why">Always-current docs injected into context. Stops Jarvis writing code against stale APIs. High value.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">microsoft/playwright-mcp</div><div class="why">Full browser automation — form fills, logins, multi-step flows. Outreach + site building + QA.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">ChromeDevTools/chrome-devtools-mcp</div><div class="why">Google's own — inspect/debug/profile real pages. Demo-site QA before you send.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">sentry-mcp</div><div class="why">Reads your real prod errors and fixes at the source. Your Railway/Vercel stack throws errors — this closes the loop.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">magic-mcp (21st.dev)</div><div class="why">Describe a UI, get polished React (like v0 inside Claude). Speeds the demo machine.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">deepwiki-open / Understand-Anything</div><div class="why">Turn any repo into an interactive wiki / knowledge graph. Great for onboarding old code, occasional use.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">ahujasid/blender-mcp</div><div class="why">Make 3D by chatting. Cool, only relevant if ad creative goes 3D. Not now.</div></div><span class="badge b-skip">Skip</span></div>
+  </div>
+
+  <!-- data/research/content -->
+  <div class="cat-group">
+    <h3>Data, research &amp; content <span>feeds the content stack</span></h3>
+    <div class="repo"><div><div class="name">crawl4ai</div><div class="why">Any website → clean markdown Claude can read. Competitor research → content strategy pipeline.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">docling</div><div class="why">PDFs + Word → structured markdown, no OCR bill. Ingest your Sales Playbook + proposals cleanly.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">gpt-researcher</div><div class="why">Deep research agent that cites sources. Powers trend research + content briefs.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">nexu-io/open-design</div><div class="why">Open-source Claude Design alternative — prototypes, landing pages, slides, video, HTML/PDF/PPTX export. Strong fit for your demo + ad pipeline.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">pr-agent</div><div class="why">AI review on every PR. Good hygiene; lower priority as a solo dev.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">activepieces</div><div class="why">Self-hostable Zapier with ~400 MCP servers. You already run n8n + GHL — only add if you outgrow them.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">iOfficeAI/OfficeCLI · Nutlope/hallmark</div><div class="why">Office-docs-via-CLI and markdown/email rendering. Niche; your Claude doc skills already cover this.</div></div><span class="badge b-skip">Skip</span></div>
+    <div class="repo"><div><div class="name">MadsLorentzen/ai-job-search · santifer/career-ops</div><div class="why">Full AI job-search systems. Great engineering, zero overlap with running a SaaS.</div></div><span class="badge b-skip">Skip</span></div>
+  </div>
+
+  <!-- infra/observability/models -->
+  <div class="cat-group">
+    <h3>Observability, agents &amp; model routing <span>Stage 5 hardening</span></h3>
+    <div class="repo"><div><div class="name">langfuse</div><div class="why">See what your agents actually do in prod. Essential once Summit agents run unattended.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">promptfoo</div><div class="why">Test + red-team the agents you build. Run before QualifyOS touches a real client.</div></div><span class="badge b-use">Use</span></div>
+    <div class="repo"><div><div class="name">12-factor-agents</div><div class="why">The methodology behind shippable agents. Read it — it'll change how you structure QualifyOS.</div></div><span class="badge b-use">Read</span></div>
+    <div class="repo"><div><div class="name">e2b</div><div class="why">Secure sandbox for Claude to run its own code. Safer autonomous execution when you loosen the gates.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">onlook / mastra / CCPlugins / gstack</div><div class="why">Visual React editing, prototype→product, command packs, Garry Tan's 23-tool setup. Cherry-pick as needs arise.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">diegosouzapw/OmniRoute · litellm</div><div class="why">One endpoint for many models + per-project spend tracking. Use <b>litellm</b> for your Summit API agents — <i>not</i> to proxy Claude Code itself (ToS + reliability risk).</div></div><span class="badge b-opt">Optional</span></div>
+  </div>
+
+  <!-- token savers -->
+  <div class="cat-group">
+    <h3>Token &amp; cost discipline <span>you care about this</span></h3>
+    <div class="repo"><div><div class="name">JuliusBrussee/caveman</div><div class="why">Cuts ~65% of <b>output</b> tokens by dropping filler. Honest caveat below — it's not a free lunch.</div></div><span class="badge b-opt">Optional</span></div>
+    <div class="repo"><div><div class="name">Haiku routing (your existing pattern)</div><div class="why">Haiku for structured agent tasks, Sonnet/Opus for reasoning. Already your winning move — bake it into Jarvis's routing.</div></div><span class="badge b-use">Use</span></div>
+  </div>
+
+  <div class="note red"><b>Honest numbers on caveman:</b> it only shrinks <b>output</b> tokens, leaves input/reasoning untouched, and adds ~1–1.5k input tokens per turn for the skill itself. On already-terse agent workloads it can go <b>net-negative</b> on cost. The real win is speed and readability, not always dollars. For your Haiku-heavy structured agents, measure before committing — you may already be past the point where it helps.</div>
+</section>
+
+<!-- BLUEPRINT -->
+<section class="section reveal">
+  <div class="eyebrow">The master file</div>
+  <h2>The Windows <code>CLAUDE.md</code> blueprint</h2>
+  <p class="lede">This is the seed. Drop it in <code>C:\Users\DanGi\Jarvis\CLAUDE.md</code>, run <code>claude</code>, and Claude Code builds the project from it — backend, overlay, voice, MCP wiring, the lot. It's a starting spec; Claude Code fills in the implementation and asks you for keys.</p>
+
+  <pre><span class="c"># CLAUDE.md — PROJECT JARVIS (Windows)</span>
+
+<span class="k">## Identity</span>
+You are JARVIS — Dan's personal AI operator. Calm, dry British wit, decisive.
+Address him as "sir" sparingly. Short answers by default; detail on request.
+Persona persists regardless of underlying model.
+
+<span class="k">## Mission</span>
+Be reachable at the desk (voice), by text (Telegram/SMS), and by phone (Twilio).
+Read files, calendar, email, and Summit OS state. Start and monitor builds.
+Draft proposals, sites, PDFs. Remember everything via the Obsidian vault.
+
+<span class="k">## Build this project (Windows-native)</span>
+1. <span class="s">backend/</span>  — Python FastAPI. Reuse Dan's Railway patterns.
+   - /brain    Claude tool-calling loop (Sonnet reason, Haiku for structured tasks)
+   - /voice    Groq Whisper STT (free) + ElevenLabs TTS (British voice)
+   - /phone    Twilio ConversationRelay webhook (/twiml, /ws) → brain
+   - /sms      Telegram bot + optional Twilio SMS webhook → brain
+   - /memory   Obsidian vault read/write + mem0 recall
+2. <span class="s">overlay/</span>  — Electron, transparent, frameless, always-on-top (bottom-right).
+   - Three.js particle orb; state color: idle=cyan, thinking=amber,
+     listening=green, error=red. Orb amplitude reacts to TTS audio.
+   - WebSocket to backend for live state + transcript.
+3. <span class="s">mcp/</span>      — wire these MCP servers:
+   - obsidian (vault), desktop-commander (files/terminal), serena (code),
+     playwright (browser), chrome-devtools (QA), context7 (docs), sentry (errors)
+4. <span class="s">summit/</span>   — tools hitting Dan's Railway endpoints:
+   - GET  /clients, /agents/status, /analytics/activity-feed   <span class="c">(auto-run)</span>
+   - POST /dispatch, demo-build, scrape, proposal            <span class="c">(CONFIRM first)</span>
+
+<span class="k">## Hard rules</span>
+- NEVER send email/SMS, spend credits, post publicly, or run destructive
+  commands without showing a preview and getting an explicit "yes".
+- NEVER expose API keys in frontend. Keys live in backend .env / Railway env.
+- Prefer static outputs + confirmation over silent autonomy.
+- Log every action to /Jarvis/memory/ in the vault.
+
+<span class="k">## Env (Dan fills in)</span>
+ANTHROPIC_API_KEY=  GROQ_API_KEY=  ELEVENLABS_API_KEY=
+TWILIO_ACCOUNT_SID=  TWILIO_AUTH_TOKEN=  TWILIO_NUMBER=
+TELEGRAM_BOT_TOKEN=  OBSIDIAN_VAULT=C:\Users\DanGi\JarvisVault
+SUMMIT_RAILWAY_URL=  SUMMIT_API_KEY=
+
+<span class="k">## First run</span>
+Walk Dan through: installing deps, generating a local SSL cert for the overlay,
+setting env vars, and a smoke test — "Jarvis, what's on my calendar today?"</pre>
+
+  <div class="note cyan"><b>How to use it:</b> paste this into the file, then tell Claude Code: <i>"Read CLAUDE.md and build the full project. Ask me before installing anything global, and stop for my keys when you need them."</i> Let it work — like the original guide says, 5–15 minutes.</div>
+</section>
+
+<!-- SAFETY / NEXT -->
+<section class="section reveal">
+  <div class="eyebrow">Before you flip it on</div>
+  <h2>Guardrails &amp; your Stage-1 checklist</h2>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="panel">
+      <h3 style="margin-top:0;color:var(--red)">The three rules that keep this safe</h3>
+      <ul class="clean">
+        <li><b>Confirmation gates</b> on anything that spends, sends, or deletes.</li>
+        <li><b>Keys in the backend only</b> — never in the overlay/frontend. Your own security principle.</li>
+        <li><b>Headphones for desk voice</b> — the mic hears the TTS otherwise (same fix as the original guide).</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3 style="margin-top:0;color:var(--green)">Do this weekend (Stage 1)</h3>
+      <ul class="clean">
+        <li>Install Node, Python, VS Code, Claude Code, Codex, Obsidian</li>
+        <li>Create the vault + drop in <code>CLAUDE.md</code></li>
+        <li>Get 3 keys: Anthropic, Groq (free), ElevenLabs (free tier)</li>
+        <li>Run <code>claude</code>, let it build, smoke-test with a calendar question</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note"><b>Sequencing note for me next time:</b> when you're ready, I can generate any single stage as its own deep-dive — the exact Twilio ConversationRelay backend code, the Electron orb component, the Summit OS tool definitions, or the seeded Obsidian vault structure with all 18 screenshots + the Playbook loaded as knowledge files. Say which stage and I'll go deep on just that one so nothing gets half-built.</div>
+</section>
+
+<!-- FINAL -->
+<section class="final reveal">
+  <div class="reactor" aria-hidden="true">
+    <div class="ring r4"></div><div class="ring r3"></div><div class="ring r2"></div><div class="ring r1"></div><div class="core"></div>
+  </div>
+  <div class="eyebrow" style="justify-content:center">Initialization ready</div>
+  <h2 style="font-size:clamp(1.6rem,4vw,2.4rem);margin-top:10px">"Sometimes you gotta run before you can walk."</h2>
+  <p style="color:var(--muted);max-width:560px;margin:12px auto 0">Start with Stage 1. A Jarvis you can talk to this weekend beats a perfect one that never ships. The rest bolts on.</p>
+</section>
+
+</div>
+
+<footer>
+  PROJECT JARVIS · Windows Build Guide · assembled for Summit Voice AI ·
+  research verified against live GitHub + Twilio + Obsidian sources, July 2026
+</footer>
+
+<script>
+  // scroll reveal
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // subtle orbiting particle field behind hero reactor
+  (function(){
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const hero = document.querySelector('.hero');
+    const c = document.createElement('canvas');
+    c.style.cssText='position:absolute;inset:0;z-index:-1;pointer-events:none';
+    hero.appendChild(c);
+    const ctx = c.getContext('2d');
+    let w,h,parts;
+    function size(){ w=c.width=hero.offsetWidth; h=c.height=hero.offsetHeight;
+      parts=Array.from({length:Math.min(70,Math.floor(w/18))},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.6+.4}));
+    }
+    size(); window.addEventListener('resize',size);
+    function loop(){
+      ctx.clearRect(0,0,w,h);
+      for(const p of parts){
+        p.x+=p.vx;p.y+=p.vy;
+        if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1;
+        ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.28);
+        ctx.fillStyle='rgba(59,232,255,'+(.15+p.r*.12)+')';ctx.fill();
+      }
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+</script>
+</body>
+</html>

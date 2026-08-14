@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The $30K Website Machine — Ultimate Build System 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#06090f;--s1:#0d1117;--s2:#161b22;--bo:#21262d;
+  --or:#f97316;--ord:rgba(249,115,22,.12);
+  --cy:#22d3ee;--cyd:rgba(34,211,238,.1);
+  --gn:#4ade80;--gnd:rgba(74,222,128,.1);
+  --pu:#c084fc;--pud:rgba(192,132,252,.1);
+  --yw:#fbbf24;--ywd:rgba(251,191,36,.1);
+  --rd:#f87171;--rdd:rgba(248,113,113,.1);
+  --pk:#f472b6;--pkd:rgba(244,114,182,.1);
+  --bl:#4285f4;--bld:rgba(66,133,244,.12);
+  --tx:#e6edf3;--tm:#7d8590;--td:#484f58;
+  --fd:'Syne',sans-serif;--fb:'Inter',sans-serif;--fm:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:var(--fb);font-size:14px;line-height:1.7;overflow-x:hidden}
+.nav{position:fixed;top:0;left:0;width:236px;height:100vh;background:var(--s1);border-right:1px solid var(--bo);overflow-y:auto;z-index:100;padding:16px 0;scrollbar-width:thin}
+.nlogo{font-family:var(--fd);font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--or);padding:0 16px 12px;border-bottom:1px solid var(--bo);margin-bottom:8px;line-height:1.5}
+.ns{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--td);padding:9px 16px 2px}
+.nl{display:flex;align-items:center;gap:6px;padding:5px 16px;font-size:11.5px;color:var(--tm);text-decoration:none;transition:.15s;border-left:2px solid transparent}
+.nl:hover{color:var(--tx);background:rgba(255,255,255,.04);border-left-color:var(--or)}
+.nd{width:4px;height:4px;border-radius:50%;background:var(--bo);flex-shrink:0}
+.main{margin-left:236px;padding:0 52px 140px;max-width:1000px}
+.hero{padding:60px 0 44px;border-bottom:1px solid var(--bo);margin-bottom:48px}
+.hk{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--or);margin-bottom:10px}
+.ht{font-family:var(--fd);font-size:42px;font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-bottom:14px}
+.ht .acc{color:var(--or)}.ht .cy{color:var(--cy)}
+.hs{font-size:14.5px;color:var(--tm);max-width:600px;margin-bottom:22px;line-height:1.7}
+.badges{display:flex;gap:7px;flex-wrap:wrap}
+.badge{padding:3px 9px;border-radius:20px;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.b-or{background:var(--ord);color:var(--or);border:1px solid rgba(249,115,22,.3)}
+.b-cy{background:var(--cyd);color:var(--cy);border:1px solid rgba(34,211,238,.3)}
+.b-gn{background:var(--gnd);color:var(--gn);border:1px solid rgba(74,222,128,.3)}
+.b-pu{background:var(--pud);color:var(--pu);border:1px solid rgba(192,132,252,.3)}
+.b-yw{background:var(--ywd);color:var(--yw);border:1px solid rgba(251,191,36,.3)}
+.b-bl{background:var(--bld);color:var(--bl);border:1px solid rgba(66,133,244,.3)}
+.sec{margin-bottom:56px;scroll-margin-top:24px}
+.sh{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid var(--bo)}
+.si{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.i-or{background:var(--ord)}.i-cy{background:var(--cyd)}.i-gn{background:var(--gnd)}.i-pu{background:var(--pud)}.i-yw{background:var(--ywd)}.i-pk{background:var(--pkd)}.i-bl{background:var(--bld)}
+.st{font-family:var(--fd);font-size:18px;font-weight:700;letter-spacing:-.01em}
+h3{font-family:var(--fd);font-size:13px;font-weight:700;color:var(--tx);margin:22px 0 8px}
+p{color:var(--tm);margin-bottom:10px;font-size:13.5px}
+p strong{color:var(--tx)}
+.pb{border-radius:11px;padding:14px 18px;margin-bottom:28px;display:flex;align-items:center;gap:14px}
+.pb-or{background:linear-gradient(135deg,rgba(249,115,22,.15),rgba(249,115,22,.04));border:1px solid rgba(249,115,22,.4)}
+.pb-cy{background:linear-gradient(135deg,rgba(34,211,238,.15),rgba(34,211,238,.04));border:1px solid rgba(34,211,238,.4)}
+.pb-gn{background:linear-gradient(135deg,rgba(74,222,128,.15),rgba(74,222,128,.04));border:1px solid rgba(74,222,128,.4)}
+.pb-pu{background:linear-gradient(135deg,rgba(192,132,252,.15),rgba(192,132,252,.04));border:1px solid rgba(192,132,252,.4)}
+.pb-yw{background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(251,191,36,.04));border:1px solid rgba(251,191,36,.4)}
+.pb-bl{background:linear-gradient(135deg,rgba(66,133,244,.15),rgba(66,133,244,.04));border:1px solid rgba(66,133,244,.4)}
+.pbn{font-family:var(--fd);font-size:26px;font-weight:800;flex-shrink:0;width:44px;text-align:center}
+.pbb{flex:1}
+.pbt{font-family:var(--fd);font-size:16px;font-weight:800;margin-bottom:2px}
+.pbs{font-size:12px;color:var(--tm)}
+.card{background:var(--s1);border:1px solid var(--bo);border-radius:11px;padding:16px;margin-bottom:11px}
+.c-or{border-color:rgba(249,115,22,.3);background:linear-gradient(135deg,rgba(249,115,22,.06),var(--s1) 60%)}
+.c-cy{border-color:rgba(34,211,238,.3);background:linear-gradient(135deg,rgba(34,211,238,.06),var(--s1) 60%)}
+.c-gn{border-color:rgba(74,222,128,.3);background:linear-gradient(135deg,rgba(74,222,128,.06),var(--s1) 60%)}
+.c-pu{border-color:rgba(192,132,252,.3);background:linear-gradient(135deg,rgba(192,132,252,.06),var(--s1) 60%)}
+.c-yw{border-color:rgba(251,191,36,.3);background:linear-gradient(135deg,rgba(251,191,36,.06),var(--s1) 60%)}
+.c-bl{border-color:rgba(66,133,244,.3);background:linear-gradient(135deg,rgba(66,133,244,.06),var(--s1) 60%)}
+.ct{font-family:var(--fd);font-size:13px;font-weight:700;margin-bottom:5px;color:var(--tx);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.cd{font-size:12.5px;color:var(--tm);line-height:1.6}
+.cd a{color:var(--cy);text-decoration:none}.cd a:hover{text-decoration:underline}
+.cb{background:#010409;border:1px solid var(--bo);border-radius:10px;overflow:hidden;margin:9px 0}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:7px 13px;background:var(--s2);border-bottom:1px solid var(--bo);font-family:var(--fm);font-size:10px;color:var(--td)}
+.cbody{padding:13px;font-family:var(--fm);font-size:11.5px;line-height:1.65;color:#c9d1d9;white-space:pre-wrap;overflow-x:auto}
+.pblock{background:#010409;border:2px solid rgba(249,115,22,.45);border-radius:12px;overflow:hidden;margin:12px 0}
+.phead{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:rgba(249,115,22,.1);border-bottom:1px solid rgba(249,115,22,.25)}
+.plabel{font-family:var(--fd);font-size:11px;font-weight:800;color:var(--or);letter-spacing:.05em;text-transform:uppercase}
+.pbody{padding:16px 18px;font-family:var(--fm);font-size:11.5px;line-height:1.7;color:#d4e0f0;white-space:pre-wrap;overflow-x:auto;max-height:640px;overflow-y:auto}
+.pblock.cy{border-color:rgba(34,211,238,.45)}.pblock.cy .phead{background:rgba(34,211,238,.1);border-bottom-color:rgba(34,211,238,.25)}.pblock.cy .plabel{color:var(--cy)}
+.pblock.gn{border-color:rgba(74,222,128,.45)}.pblock.gn .phead{background:rgba(74,222,128,.1);border-bottom-color:rgba(74,222,128,.25)}.pblock.gn .plabel{color:var(--gn)}
+.pblock.pu{border-color:rgba(192,132,252,.45)}.pblock.pu .phead{background:rgba(192,132,252,.1);border-bottom-color:rgba(192,132,252,.25)}.pblock.pu .plabel{color:var(--pu)}
+.copybtn{background:var(--s1);border:1px solid var(--bo);border-radius:5px;padding:3px 9px;font-size:10.5px;color:var(--tm);cursor:pointer;font-family:var(--fb);transition:.15s}
+.copybtn:hover{color:var(--tx);border-color:var(--or)}
+.bigcopy{background:var(--or);border:none;border-radius:7px;padding:6px 18px;font-size:11.5px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--fb);transition:.15s;white-space:nowrap}
+.bigcopy:hover{opacity:.85}
+.bigcopy.cy{background:var(--cy);color:#04141a}.bigcopy.gn{background:var(--gn);color:#04140a}.bigcopy.pu{background:var(--pu);color:#1a0a24}
+.co{border-radius:9px;padding:11px 15px;margin:10px 0;display:flex;gap:9px;font-size:12.5px;line-height:1.6}
+.co-or{background:var(--ord);border:1px solid rgba(249,115,22,.25);color:var(--tm)}
+.co-gn{background:var(--gnd);border:1px solid rgba(74,222,128,.25);color:var(--tm)}
+.co-cy{background:var(--cyd);border:1px solid rgba(34,211,238,.25);color:var(--tm)}
+.co-yw{background:var(--ywd);border:1px solid rgba(251,191,36,.25);color:var(--tm)}
+.co-rd{background:var(--rdd);border:1px solid rgba(248,113,113,.25);color:var(--tm)}
+.co-bl{background:var(--bld);border:1px solid rgba(66,133,244,.25);color:var(--tm)}
+.co-pu{background:var(--pud);border:1px solid rgba(192,132,252,.25);color:var(--tm)}
+.ci{font-size:14px;flex-shrink:0;margin-top:1px}
+.co strong{color:var(--tx)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.steps{display:flex;flex-direction:column;margin:12px 0}
+.step{display:flex;gap:12px}
+.sl{display:flex;flex-direction:column;align-items:center}
+.sn{width:24px;height:24px;border-radius:50%;background:var(--ord);border:1px solid rgba(249,115,22,.4);color:var(--or);font-family:var(--fd);font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sn.gn{background:var(--gnd);border-color:rgba(74,222,128,.4);color:var(--gn)}
+.sn.cy{background:var(--cyd);border-color:rgba(34,211,238,.4);color:var(--cy)}
+.sn.pu{background:var(--pud);border-color:rgba(192,132,252,.4);color:var(--pu)}
+.sn.bl{background:var(--bld);border-color:rgba(66,133,244,.4);color:var(--bl)}
+.sline{width:1px;flex:1;background:var(--bo);margin:3px 0;min-height:14px}
+.sc{padding-bottom:16px;flex:1}
+.stitle{font-family:var(--fd);font-size:12.5px;font-weight:700;color:var(--tx);margin-bottom:3px;padding-top:2px}
+.stext{font-size:12.5px;color:var(--tm);line-height:1.6}
+.tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.t-or{background:var(--ord);color:var(--or)}.t-gn{background:var(--gnd);color:var(--gn)}.t-yw{background:var(--ywd);color:var(--yw)}.t-rd{background:var(--rdd);color:var(--rd)}.t-cy{background:var(--cyd);color:var(--cy)}.t-pu{background:var(--pud);color:var(--pu)}.t-bl{background:var(--bld);color:var(--bl)}.t-pk{background:var(--pkd);color:var(--pk)}
+.tw{overflow-x:auto;margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:var(--s2);padding:7px 11px;text-align:left;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tm);border:1px solid var(--bo)}
+td{padding:7px 11px;border:1px solid var(--bo);color:var(--tm);font-size:12.5px;vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.02)}
+td strong{color:var(--tx)}
+.repo{display:flex;align-items:flex-start;gap:12px;background:var(--s1);border:1px solid var(--bo);border-radius:10px;padding:14px;margin-bottom:9px;transition:.15s}
+.repo:hover{border-color:rgba(249,115,22,.3)}
+.ricon{font-size:20px;flex-shrink:0;margin-top:2px}
+.rbody{flex:1}
+.rname{font-family:var(--fm);font-size:12px;font-weight:600;color:var(--cy);margin-bottom:3px}
+.rdesc{font-size:12px;color:var(--tm);line-height:1.5;margin-bottom:6px}
+.rmeta{display:flex;gap:6px;flex-wrap:wrap}
+.rcmd{font-family:var(--fm);font-size:10.5px;background:var(--s2);color:var(--gn);padding:3px 7px;border-radius:4px;margin-top:5px;display:block;white-space:pre-wrap;line-height:1.5}
+code{font-family:var(--fm);font-size:11px;background:var(--s2);padding:1px 5px;border-radius:4px;color:var(--cy)}
+.div{height:1px;background:var(--bo);margin:28px 0}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bo);border-radius:3px}
+@media(max-width:800px){.nav{display:none}.main{margin-left:0;padding:0 16px 80px}.g2,.g3{grid-template-columns:1fr}.ht{font-size:26px}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nlogo">⚙️ The $30K Website<br>Machine — 2026</div>
+  <div class="ns">Start Here</div>
+  <a href="#tldr" class="nl"><span class="nd"></span>The 60-Second Overview</a>
+  <a href="#credits" class="nl"><span class="nd"></span>Fix Your Credit Problem</a>
+  <a href="#decision" class="nl"><span class="nd"></span>Decision Tree</a>
+  <div class="ns">One-Time Machine Setup</div>
+  <a href="#install-everything" class="nl"><span class="nd"></span>Install Everything (Once)</a>
+  <a href="#all-skills" class="nl"><span class="nd"></span>Every Skill</a>
+  <a href="#all-mcps" class="nl"><span class="nd"></span>Every MCP</a>
+  <div class="ns">Every New Project</div>
+  <a href="#project-ritual" class="nl"><span class="nd"></span>The Project Ritual</a>
+  <a href="#folder-setup" class="nl"><span class="nd"></span>Folder + VS Code + Claude</a>
+  <div class="ns">The 3 Build Paths</div>
+  <a href="#path-a" class="nl"><span class="nd"></span>A: Firecrawl Their Site</a>
+  <a href="#path-b" class="nl"><span class="nd"></span>B: Reference + Their Assets</a>
+  <a href="#path-c" class="nl"><span class="nd"></span>C: No Site / From Scratch</a>
+  <div class="ns">The Master Prompts</div>
+  <a href="#prompt-firecrawl" class="nl"><span class="nd"></span>⭐ Firecrawl Build Prompt</a>
+  <a href="#prompt-reference" class="nl"><span class="nd"></span>⭐ Reference+Assets Prompt</a>
+  <a href="#prompt-scratch" class="nl"><span class="nd"></span>⭐ From-Scratch Prompt</a>
+  <a href="#prompt-any-industry" class="nl"><span class="nd"></span>⭐ Any Industry Prompt</a>
+  <div class="ns">Cost-Saving Orchestration</div>
+  <a href="#orchestration" class="nl"><span class="nd"></span>Manager/Worker Model</a>
+  <a href="#memory" class="nl"><span class="nd"></span>Token-Saving Tools</a>
+  <a href="#route-setup" class="nl"><span class="nd"></span>⭐ /route: Fable+Sol Loop</a>
+  <div class="ns">The Element Library</div>
+  <a href="#elements" class="nl"><span class="nd"></span>10K Elements (Real Code)</a>
+  <a href="#cursor-fx" class="nl"><span class="nd"></span>Cursor Effects</a>
+  <a href="#menu-fx" class="nl"><span class="nd"></span>Menu + Marquee</a>
+  <a href="#micro" class="nl"><span class="nd"></span>Micro-interactions</a>
+  <a href="#type-system" class="nl"><span class="nd"></span>Typography System</a>
+  <a href="#shape-blur" class="nl"><span class="nd"></span>Shape Blur Effect</a>
+  <div class="ns">Bonus Systems</div>
+  <a href="#higgsfield" class="nl"><span class="nd"></span>Higgsfield Images</a>
+  <a href="#nocode" class="nl"><span class="nd"></span>Relume/Framer/Omma</a>
+  <a href="#assets-reference" class="nl"><span class="nd"></span>Reference Image Trick</a>
+  <a href="#four-layer" class="nl"><span class="nd"></span>4-Layer Minimum Stack</a>
+  <a href="#ai-setter" class="nl"><span class="nd"></span>Bonus: AI DM Setter</a>
+  <div class="ns">Reference</div>
+  <a href="#master-checklist" class="nl"><span class="nd"></span>Master Checklist</a>
+</nav>
+
+<main class="main">
+
+<div class="hero">
+  <div class="hk">Summit Marketing Group — The Complete Rinse & Repeat System</div>
+  <h1 class="ht">The <span class="acc">$30K Website</span> Machine<br>Any Client. <span class="cy">Any Industry.</span> One Day.</h1>
+  <p class="hs">Firecrawl their old site → download all assets → hand to Claude → ship a $30K site. Or clone a reference + swap in their brand. Every skill, MCP, prompt, and the cost-saving orchestration that stops you burning credits. Leave this on your desktop. Copy-paste your way to done.</p>
+  <div class="badges">
+    <span class="badge b-or">Firecrawl → Assets → Build</span>
+    <span class="badge b-cy">Manager/Worker Orchestration</span>
+    <span class="badge b-gn">Token-Saving Memory</span>
+    <span class="badge b-pu">Every Skill + MCP</span>
+    <span class="badge b-yw">Any Industry</span>
+    <span class="badge b-bl">Copy-Paste Prompts</span>
+  </div>
+</div>
+
+<!-- TLDR -->
+<section class="sec" id="tldr">
+  <div class="sh"><div class="si i-or">⚡</div><h2 class="st">The 60-Second Overview — How This Works</h2></div>
+
+  <p>Every website you build follows the same shape. The only thing that changes is <strong>where the assets and structure come from</strong>. Here's the whole machine in one picture:</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>If the client…</th><th>You use…</th><th>The prompt</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Has a bad/old website</strong></td><td>Firecrawl to rip all assets + copy → hand folder to Claude</td><td><span class="tag t-or">Path A</span> Firecrawl Build</td></tr>
+        <tr><td><strong>Has a site + you found a reference they love</strong></td><td>Clone reference structure + swap in their real assets</td><td><span class="tag t-cy">Path B</span> Reference + Assets</td></tr>
+        <tr><td><strong>Has no website at all</strong></td><td>Build from scratch with generated copy + stock/AI images</td><td><span class="tag t-gn">Path C</span> From Scratch</td></tr>
+        <tr><td><strong>Is any non-roofing industry</strong></td><td>Same as A/B/C — just swap the industry variable</td><td><span class="tag t-pu">Universal</span> Any Industry</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="co co-gn">
+    <span class="ci">🎯</span>
+    <div><strong>The core loop, every time:</strong> (1) One-time: install skills + MCPs on your machine. (2) Per project: make a folder, drop in assets, open VS Code + Claude. (3) Run the install command. (4) Paste the right master prompt. (5) Let the manager/worker orchestration build it cheaply. (6) Polish pass. (7) Deploy to Vercel. Ship the link.</div>
+  </div>
+</section>
+
+<!-- CREDITS -->
+<section class="sec" id="credits">
+  <div class="sh"><div class="si i-rd">💰</div><h2 class="st">Fix Your Credit Problem First (Read This)</h2></div>
+
+  <p>You said you're burning all your credits and tokens. This is the single most important section. Here's the exact strategy to cut your spend by 60–90% while keeping quality.</p>
+
+  <div class="co co-rd">
+    <span class="ci">⚠️</span>
+    <div><strong>The mistake:</strong> Running Opus (or a top-tier model) for the <em>entire</em> build — including boilerplate, file scaffolding, and simple sections. That's like paying a $500/hr architect to hammer nails. The fix is a <strong>manager/worker split</strong> plus <strong>token-saving memory tools</strong>.</div>
+  </div>
+
+  <div class="g2">
+    <div class="card c-gn">
+      <div class="ct">✅ The Cheap Setup (do this)</div>
+      <div class="cd">
+        • <strong>Sonnet 4.6 as your daily driver</strong> — 90% of the build. $3/1M input.<br>
+        • <strong>Opus 4.8 only for:</strong> the 3D/animation foundation, complex architecture, and when Sonnet breaks 2+ times.<br>
+        • <strong>Gemini 2.5 Pro (free) for scaffolding</strong> — full site skeleton at zero cost, then polish in Claude Code.<br>
+        • <strong>Caveman + memory tools</strong> to cut token use 65%+.<br>
+        • <strong>gitingest / crawl4ai</strong> to feed Claude clean context instead of raw HTML.
+      </div>
+    </div>
+    <div class="card c-rd">
+      <div class="ct">❌ What's Draining You</div>
+      <div class="cd">
+        • Running Opus for the whole session<br>
+        • Re-pasting the same context every message (no memory)<br>
+        • Feeding raw scraped HTML (huge token bloat)<br>
+        • Letting Claude re-read the entire codebase each turn<br>
+        • Not using free Gemini for the boring scaffold<br>
+        • Building from scratch when Firecrawl + clone is 5x faster
+      </div>
+    </div>
+  </div>
+
+  <div class="co co-cy">
+    <span class="ci">🧠</span>
+    <div><strong>On your "Fable 5 as manager, Opus as worker" idea:</strong> This is a real, smart pattern (see the <a href="#orchestration" style="color:var(--cy)">Orchestration section</a>). Since Fable 5 routes some queries to Opus 4.8 via safeguards anyway, the cleaner version in practice is: <strong>use one strong model as the planner/reviewer, and cheaper Sonnet agents as the workers.</strong> The planner writes the spec + reviews; the workers execute. You'll see the full setup below with the actual repos that make it work (ECC, get-shit-done, 12-factor-agents).</div>
+  </div>
+</section>
+
+<!-- DECISION -->
+<section class="sec" id="decision">
+  <div class="sh"><div class="si i-yw">🎯</div><h2 class="st">Decision Tree — Pick Your Path in 5 Seconds</h2></div>
+  <div class="cb">
+    <div class="ch">Read top to bottom — stop at the first match<button class="copybtn" onclick="cc(this)">Copy</button></div>
+    <div class="cbody">START: Does the client have a current website?
+│
+├── YES, and it's bad but has real logo/photos/content I want to keep
+│     └──► PATH A: Firecrawl their site → download all assets → rebuild premium
+│           (fastest when they have brand assets worth keeping)
+│
+├── YES, and I ALSO found a reference site whose design they love
+│     └──► PATH B: Clone the reference's structure/animations
+│                  + swap in THEIR real assets from their site
+│           (best of both — great design + their real brand)
+│
+└── NO website, or the current one is worthless
+      └──► PATH C: Build from scratch
+                   + AI-generate copy + stock/Higgsfield images
+            (client provides logo, phone, services; Claude does the rest)
+
+ANY INDUSTRY (plumber, electrician, barber, restaurant, pest control):
+      └──► Use A, B, or C above — just change the [INDUSTRY] variable
+           in the prompt. The machine is identical.</div>
+  </div>
+</section>
+
+<!-- ═══════════════ ONE-TIME SETUP ═══════════════ -->
+<div class="pb pb-pu">
+  <div class="pbn" style="color:var(--pu)">◆</div>
+  <div class="pbb">
+    <div class="pbt" style="color:var(--pu)">One-Time Machine Setup</div>
+    <div class="pbs">Do this ONCE on your computer. Then it's available for every future project. ~15 minutes.</div>
+  </div>
+</div>
+
+<section class="sec" id="install-everything">
+  <div class="sh"><div class="si i-pu">🧰</div><h2 class="st">Install Everything — The One-Time Command Block</h2></div>
+
+  <p>Run this once in PowerShell. It sets up the global skills and tools that live on your machine forever. Per-project stuff comes later.</p>
+
+  <div class="cb">
+    <div class="ch">ONE-TIME global setup — run in admin PowerShell<button class="copybtn" onclick="cc(this)">Copy</button></div>
+    <div class="cbody"># ══════════════════════════════════════════════
+# ONE-TIME MACHINE SETUP — run once, ever
+# ══════════════════════════════════════════════
+
+# 1. Core tools (if not already installed)
+winget install OpenJS.NodeJS.LTS
+winget install Python.Python.3.12
+winget install Git.Git
+
+# 2. Windows python3 alias fix (needed by several skills)
+Copy-Item "C:\Python314\python.exe" "C:\Python314\python3.exe"
+
+# 3. Claude Code CLI
+npm install -g @anthropic-ai/claude-code
+
+# 4. UI/UX Pro Max — design intelligence (install GLOBALLY = every project gets it)
+npm install -g uipro-cli
+uipro init --ai claude --global
+
+# 5. Firecrawl — the website ripper (assets + clean markdown)
+npm install -g firecrawl-cli
+# You'll add the API key per-project or via env var (get free key at firecrawl.dev)
+
+# 6. Playwright (for Perfect Web Clone + agent-browser skills)
+npx playwright install chromium
+
+# 7. Global skill directory — clone the "install on every project" skills here
+mkdir "$env:USERPROFILE\.claude\skills"
+
+# Perfect Web Clone (DOM-level cloner — better than screenshots for animated sites)
+git clone https://github.com/ericshang98/perfect-web-clone-skill.git "$env:USERPROFILE\.claude\skills\perfect-web-clone"
+pip install -r "$env:USERPROFILE\.claude\skills\perfect-web-clone\scripts\requirements.txt" --break-system-packages
+
+# emilkowalski/skill — animation & interaction design intelligence
+npx -y skills add emilkowalski/skill --agent claude-code --global
+
+echo "✅ Machine setup complete. Skills + tools installed globally."</div>
+  </div>
+</section>
+
+<!-- ALL SKILLS -->
+<section class="sec" id="all-skills">
+  <div class="sh"><div class="si i-pu">🎨</div><h2 class="st">Every Skill Worth Installing (From the Screenshots + More)</h2></div>
+
+  <p>These are the skills from your screenshots plus the ones that matter most for premium websites. Install the ⭐ ones globally; the rest per-project as needed.</p>
+
+  <h3>⭐ Install On Every Website Project</h3>
+
+  <div class="repo"><div class="ricon">🎨</div><div class="rbody">
+    <div class="rname">nextlevelbuilder/ui-ux-pro-max-skill</div>
+    <div class="rdesc">91.8k★ — Design intelligence: 57 UI styles, 95 color palettes, 56 font pairings, 24 chart types, landing patterns. THE skill for making Claude produce premium UI instead of generic output. Install globally.</div>
+    <div class="rmeta"><span class="tag t-or">Required</span><span class="tag t-gn">91.8k★</span></div>
+    <span class="rcmd">uipro init --ai claude --global</span>
+  </div></div>
+
+  <div class="repo"><div class="ricon">✨</div><div class="rbody">
+    <div class="rname">emilkowalski/skill</div>
+    <div class="rdesc">Animation & interaction design intelligence. Covers animations, design, code, performance for building better UIs. This is the skill that makes hovers, transitions, and micro-interactions feel professional. From your screenshots.</div>
+    <div class="rmeta"><span class="tag t-or">Required for Animation</span></div>
+    <span class="rcmd">npx skills add emilkowalski/skill</span>
+  </div></div>
+
+  <div class="repo"><div class="ricon">🧠</div><div class="rbody">
+    <div class="rname">supermemory</div>
+    <div class="rdesc">Fast memory engine that remembers across sessions and runs fully local. KEY for your credit problem — stops Claude re-reading everything each turn. From your screenshots.</div>
+    <div class="rmeta"><span class="tag t-gn">Cuts Token Use</span><span class="tag t-cy">Local</span></div>
+    <span class="rcmd">npx skills add supermemory</span>
+  </div></div>
+
+  <div class="repo"><div class="ricon">🔍</div><div class="rbody">
+    <div class="rname">sanyuan-skills</div>
+    <div class="rdesc">Expert code-review skill — SOLID, security, and edge cases before you ship. Run this as your final review pass. Great as the "reviewer" in the manager/worker setup. From your screenshots.</div>
+    <div class="rmeta"><span class="tag t-yw">Final Review Pass</span></div>
+    <span class="rcmd">npx skills add sanyuan-skills</span>
+  </div></div>
+
+  <div class="repo"><div class="ricon">🌐</div><div class="rbody">
+    <div class="rname">agent-browser (Vercel)</div>
+    <div class="rdesc">Vercel's browser skill — Claude clicks and tests your app in a real browser. Use it to auto-QA the site before you send the preview link. From your screenshots.</div>
+    <div class="rmeta"><span class="tag t-cy">Auto-QA</span></div>
+    <span class="rcmd">npx skills add agent-browser</span>
+  </div></div>
+
+  <div class="repo"><div class="ricon">🗂️</div><div class="rbody">
+    <div class="rname">mattpocock/skills + awesome-claude-skills</div>
+    <div class="rdesc">Matt Pocock's battle-tested .claude directory for real engineers, plus the master directory with connectors to Slack, Jira, Linear, GitHub + 1000 more. Good source to browse for niche skills. From your screenshots.</div>
+    <div class="rmeta"><span class="tag t-pu">Skill Library</span></div>
+    <span class="rcmd">git clone https://github.com/mattpocock/skills</span>
+  </div></div>
+
+  <h3>💰 Token-Saving Skills (Fix Your Credit Burn)</h3>
+
+  <div class="g2">
+    <div class="card c-gn">
+      <div class="ct">caveman <span class="tag t-gn">−65% tokens</span></div>
+      <div class="cd">Makes Claude talk like a caveman internally — cuts 65% of your tokens on less-critical sessions. Use for scaffolding, boilerplate, and file setup where verbose reasoning isn't needed. From your screenshots.</div>
+    </div>
+    <div class="card c-cy">
+      <div class="ct">ECC (Enhanced Claude Code) <span class="tag t-cy">Harness</span></div>
+      <div class="cd">Tunes Claude Code itself — skills, instincts, memory, and security in one harness. The performance optimization system. This is your orchestration backbone. From your screenshots.</div>
+    </div>
+    <div class="card c-pu">
+      <div class="ct">get-shit-done <span class="tag t-pu">Meta-prompting</span></div>
+      <div class="cd">Meta-prompting and spec-driven development in one system. The manager writes the spec, workers execute. This is the repo that makes the manager/worker pattern real. From your screenshots.</div>
+    </div>
+    <div class="card c-yw">
+      <div class="ct">12-factor-agents <span class="tag t-yw">Methodology</span></div>
+      <div class="cd">The methodology behind every shippable agent. Read this to understand how to structure the manager/worker orchestration reliably. From your screenshots.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ALL MCPS -->
+<section class="sec" id="all-mcps">
+  <div class="sh"><div class="si i-cy">🔌</div><h2 class="st">Every MCP to Connect (From the Screenshots + PDF)</h2></div>
+
+  <p>MCPs let Claude actually DO things — drive your browser, control files, make 3D, generate images. Add these in <strong>Claude Desktop → Settings → Connectors</strong> or <code>.claude/settings.json</code>. Here's the complete config with everything from your screenshots and the Higgsfield PDF.</p>
+
+  <div class="cb">
+    <div class="ch">.claude/settings.json — the complete MCP config<button class="copybtn" onclick="cc(this)">Copy</button></div>
+    <div class="cbody">{
+  "mcpServers": {
+    "magic": {
+      "command": "npx",
+      "args": ["-y", "@21st-dev/magic@latest"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "desktop-commander": {
+      "command": "npx",
+      "args": ["-y", "@wonderwhy-er/desktop-commander@latest"]
+    },
+    "firecrawl": {
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp@latest"],
+      "env": { "FIRECRAWL_API_KEY": "fc-YOUR-KEY-HERE" }
+    },
+    "higgsfield": {
+      "type": "url",
+      "url": "https://mcp.higgsfield.ai/mcp"
+    },
+    "serena": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/oraios/serena", "serena-mcp-server"]
+    }
+  }
+}</div>
+  </div>
+
+  <div class="g2">
+    <div class="card c-or">
+      <div class="ct">21st.dev Magic <span class="tag t-or">Components</span></div>
+      <div class="cd">1,300+ premium React components. Type <code>/ui</code> to pull a hero, carousel, or card. The fastest way to Awwwards-level UI.</div>
+    </div>
+    <div class="card c-cy">
+      <div class="ct">Context7 <span class="tag t-cy">Live Docs</span></div>
+      <div class="cd">Always-current documentation for any library injected into your prompt. Stops Claude using outdated GSAP/Three.js APIs. From your screenshots.</div>
+    </div>
+    <div class="card c-gn">
+      <div class="ct">Playwright MCP <span class="tag t-gn">Browser</span></div>
+      <div class="cd">Claude drives a real browser — for the clone workflow and auto-testing. Microsoft official. From your screenshots.</div>
+    </div>
+    <div class="card c-pu">
+      <div class="ct">Desktop Commander <span class="tag t-pu">Files + Terminal</span></div>
+      <div class="cd">Full file system + terminal control. Claude can move your Firecrawl assets into the project folder itself. From your screenshots.</div>
+    </div>
+    <div class="card c-yw">
+      <div class="ct">Serena <span class="tag t-yw">Coding Agent</span></div>
+      <div class="cd">Turns Claude into a semantic coding agent — understands your codebase structure without re-reading every file. Saves tokens. From your screenshots.</div>
+    </div>
+    <div class="card c-bl">
+      <div class="ct">Higgsfield <span class="tag t-bl">30+ Image Models</span></div>
+      <div class="cd">30+ image/video models behind one connector. Nano Banana Pro for text, Soul 2.0 for people, Seedream for locations. Generate hero images, before/afters, team photos. From your PDF.</div>
+    </div>
+    <div class="card c-cy">
+      <div class="ct">Blender MCP <span class="tag t-cy">3D by Chat</span></div>
+      <div class="cd">Make 3D models by chatting. For custom 3D house/roof models when Spline isn't enough. github.com/ahujasid/blender-mcp. From your screenshots.</div>
+    </div>
+    <div class="card c-gn">
+      <div class="ct">Netlify / Vercel MCP <span class="tag t-gn">Deploy</span></div>
+      <div class="cd">Deploy straight from Claude Code. Already in your connector list. Push and get a live preview URL in one command.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ EVERY NEW PROJECT ═══════════════ -->
+<div class="pb pb-or">
+  <div class="pbn" style="color:var(--or)">▶</div>
+  <div class="pbb">
+    <div class="pbt" style="color:var(--or)">Every New Project — The Ritual</div>
+    <div class="pbs">Do this at the start of EVERY client build. Same steps, every time. ~3 minutes.</div>
+  </div>
+</div>
+
+<section class="sec" id="project-ritual">
+  <div class="sh"><div class="si i-or">🔁</div><h2 class="st">The Project Ritual — Muscle Memory</h2></div>
+
+  <div class="steps">
+    <div class="step"><div class="sl"><div class="sn">1</div><div class="sline"></div></div><div class="sc">
+      <div class="stitle">Make the project folder + assets subfolder</div>
+      <div class="stext">Every project gets a folder with an <code>assets/</code> subfolder for the client's logo, photos, and brand colors.</div>
+    </div></div>
+    <div class="step"><div class="sl"><div class="sn">2</div><div class="sline"></div></div><div class="sc">
+      <div class="stitle">Get the assets in (Firecrawl OR client-provided)</div>
+      <div class="stext">Path A: Firecrawl their site into <code>assets/</code>. Path B/C: drop in whatever the client gave you (logo, photos).</div>
+    </div></div>
+    <div class="step"><div class="sl"><div class="sn">3</div><div class="sline"></div></div><div class="sc">
+      <div class="stitle">Open in VS Code, launch Claude Code</div>
+      <div class="stext"><code>code .</code> then <code>claude</code> (or <code>claude --chrome</code> for cloning).</div>
+    </div></div>
+    <div class="step"><div class="sl"><div class="sn">4</div><div class="sline"></div></div><div class="sc">
+      <div class="stitle">Run the per-project install command</div>
+      <div class="stext">Installs the project-scoped skills + MCPs (below). Skills you set global are already there.</div>
+    </div></div>
+    <div class="step"><div class="sl"><div class="sn">5</div><div class="sline"></div></div><div class="sc">
+      <div class="stitle">Paste the right master prompt (A, B, or C)</div>
+      <div class="stext">Fill in the variables, paste, let the orchestration build.</div>
+    </div></div>
+    <div class="step"><div class="sl"><div class="sn gn">6</div></div><div class="sc">
+      <div class="stitle">Polish → QA → Deploy → Send link</div>
+      <div class="stext">Animation polish pass, agent-browser QA, push to Vercel, hand over the preview.</div>
+    </div></div>
+  </div>
+</section>
+
+<section class="sec" id="folder-setup">
+  <div class="sh"><div class="si i-gn">📁</div><h2 class="st">Folder Setup + Per-Project Install Command</h2></div>
+
+  <div class="cb">
+    <div class="ch">Run this for EVERY new project — replace [CLIENT]<button class="copybtn" onclick="cc(this)">Copy</button></div>
+    <div class="cbody"># ══════════════════════════════════════════════
+# PER-PROJECT SETUP — run for every new client
+# ══════════════════════════════════════════════
+
+# 1. Make the project + assets folder
+cd C:\Users\DanGi\
+mkdir [CLIENT]-website
+cd [CLIENT]-website
+mkdir assets
+mkdir assets\images
+mkdir assets\logos
+mkdir assets\brand
+
+# 2. (PATH A only) Firecrawl their existing site into assets/
+#    Get free key at firecrawl.dev, then:
+firecrawl scrape https://[their-current-site].com --output assets\ --include-images --formats markdown,html
+#    This downloads their copy as markdown + all images/logos into assets/
+
+# 3. Scaffold the project (skip if cloning — the clone template has its own)
+npm create vite@latest . -- --template react-ts
+npm install
+npm install gsap framer-motion lenis three @react-three/fiber @react-three/drei @splinetool/react-spline
+npm install tailwindcss postcss autoprefixer react-router-dom react-helmet-async lucide-react react-hook-form zod
+npx tailwindcss init -p
+
+# 4. Per-project MCPs (magic MCP for components)
+claude mcp add magic -npx -y @21st-dev/magic@latest
+
+# 5. Confirm global skills are active
+uipro versions   # should show installed
+
+# 6. Git + GitHub
+git init && git add . && git commit -m "init: [CLIENT]"
+git remote add origin https://github.com/Dgill757/[CLIENT]-website.git
+git push -u origin main
+
+# 7. Open + launch Claude
+code .
+claude          # or: claude --chrome  (for cloning workflows)
+
+echo "✅ Project ready. Now paste the master prompt."</div>
+  </div>
+
+  <div class="co co-cy">
+    <span class="ci">💡</span>
+    <div><strong>The assets folder is the magic.</strong> Once their real logo, photos, and brand colors are in <code>assets/</code>, you tell Claude "use everything in the assets folder" and it builds around their real brand — not placeholders. This is what makes it feel custom, not templated.</div>
+  </div>
+</section>
+
+<!-- ═══════════════ THE 3 PATHS ═══════════════ -->
+<div class="pb pb-cy">
+  <div class="pbn" style="color:var(--cy)">3</div>
+  <div class="pbb">
+    <div class="pbt" style="color:var(--cy)">The 3 Build Paths</div>
+    <div class="pbs">Pick one based on the decision tree. Each has a copy-paste master prompt below.</div>
+  </div>
+</div>
+
+<section class="sec" id="path-a">
+  <div class="sh"><div class="si i-or">🅰️</div><h2 class="st">Path A — Firecrawl Their Old Site, Rebuild It Premium</h2></div>
+  <div class="co co-or"><span class="ci">🎯</span><div><strong>When:</strong> Client has a bad/dated site but real logo, photos, and content worth keeping. You rip everything with Firecrawl, then rebuild it as a $30K site using their real assets.</div></div>
+  <div class="steps">
+    <div class="step"><div class="sl"><div class="sn">1</div><div class="sline"></div></div><div class="sc"><div class="stitle">Firecrawl their site</div><div class="stext"><code>firecrawl scrape https://theirsite.com --output assets\ --include-images --formats markdown,html</code> — pulls copy + all images/logos into <code>assets/</code>.</div></div></div>
+    <div class="step"><div class="sl"><div class="sn">2</div><div class="sline"></div></div><div class="sc"><div class="stitle">Verify assets landed</div><div class="stext">Check <code>assets/images</code> for their real photos and logo. Note their brand colors from the scraped CSS.</div></div></div>
+    <div class="step"><div class="sl"><div class="sn">3</div></div><div class="sc"><div class="stitle">Paste the Firecrawl Build Prompt (below)</div><div class="stext">It tells Claude to use their real assets + rebuild premium.</div></div></div>
+  </div>
+</section>
+
+<section class="sec" id="path-b">
+  <div class="sh"><div class="si i-cy">🅱️</div><h2 class="st">Path B — Reference Design + Their Real Assets</h2></div>
+  <div class="co co-cy"><span class="ci">🎯</span><div><strong>When:</strong> You found a reference site with amazing design/animations, AND the client has their own assets. You clone the reference's structure + motion, but swap in the client's real brand. Best of both worlds.</div></div>
+  <div class="steps">
+    <div class="step"><div class="sl"><div class="sn cy">1</div><div class="sline"></div></div><div class="sc"><div class="stitle">Firecrawl the client's assets → assets/ folder</div><div class="stext">Same as Path A — get their real logo + photos in.</div></div></div>
+    <div class="step"><div class="sl"><div class="sn cy">2</div><div class="sline"></div></div><div class="sc"><div class="stitle">Clone the reference site's structure</div><div class="stext"><code>claude --chrome</code> → <code>/clone-website https://reference-site.com</code>. This gets the layout, components, animations, hovers.</div></div></div>
+    <div class="step"><div class="sl"><div class="sn cy">3</div></div><div class="sc"><div class="stitle">Paste the Reference + Assets Prompt (below)</div><div class="stext">Tells Claude: keep the reference's design, swap in the client's brand.</div></div></div>
+  </div>
+</section>
+
+<section class="sec" id="path-c">
+  <div class="sh"><div class="si i-gn">🅲</div><h2 class="st">Path C — No Website, Build From Scratch</h2></div>
+  <div class="co co-gn"><span class="ci">🎯</span><div><strong>When:</strong> Client has no website (or a worthless one). They give you a logo, phone number, and service list. Claude generates all copy, you use stock or Higgsfield-generated images.</div></div>
+  <div class="steps">
+    <div class="step"><div class="sl"><div class="sn gn">1</div><div class="sline"></div></div><div class="sc"><div class="stitle">Drop whatever assets they gave you into assets/</div><div class="stext">Logo at minimum. If no photos, you'll generate them with Higgsfield or use Unsplash.</div></div></div>
+    <div class="step"><div class="sl"><div class="sn gn">2</div><div class="sline"></div></div><div class="sc"><div class="stitle">(Optional) Gemini scaffold first for free</div><div class="stext">Use Gemini AI Studio to build the free skeleton, download, then polish in Claude Code.</div></div></div>
+    <div class="step"><div class="sl"><div class="sn gn">3</div></div><div class="sc"><div class="stitle">Paste the From-Scratch Prompt (below)</div><div class="stext">Claude generates copy, structure, and premium design.</div></div></div>
+  </div>
+</section>
+
+<!-- ═══════════════ MASTER PROMPTS ═══════════════ -->
+<div class="pb pb-gn">
+  <div class="pbn" style="color:var(--gn)">★</div>
+  <div class="pbb">
+    <div class="pbt" style="color:var(--gn)">The Master Prompts</div>
+    <div class="pbs">Copy-paste ready. Fill in the [VARIABLES] at the top. These are the heart of the machine.</div>
+  </div>
+</div>
+
+<section class="sec" id="prompt-firecrawl">
+  <div class="sh"><div class="si i-or">📋</div><h2 class="st">Prompt A — Firecrawl Build (Their Old Site → $30K Site)</h2></div>
+  <div class="pblock">
+    <div class="phead"><span class="plabel">⭐ Path A — Firecrawl Rebuild Prompt</span><button class="bigcopy" id="pA" onclick="cid('pAt','pA')">📋 Copy</button></div>
+    <div class="pbody" id="pAt">Act as a senior software engineer and conversion-focused web designer with 30+ years of experience building $30,000 premium websites. You specialize in Next.js/React, Framer Motion, GSAP scroll animations, 3D effects, and high-converting AI-SEO-optimized copy.
+
+I have used Firecrawl to download this client's entire existing website into the /assets folder of this project. It contains their real logo, photos, brand colors, and existing copy.
+
+═══════════════════════════════════
+CLIENT INFO
+═══════════════════════════════════
+Business: [COMPANY_NAME]
+Industry: [roofing / plumbing / electrician / barber / restaurant / pest control / etc]
+Phone: [PHONE]
+City/State: [CITY_STATE]
+Service Areas: [CITIES]
+Assets location: ./assets/ (their real logo, images, brand colors, scraped copy)
+
+═══════════════════════════════════
+STEP 1 — INVENTORY THE ASSETS
+═══════════════════════════════════
+Before building, examine the ./assets folder:
+- List every image and logo found
+- Extract their exact brand colors from the scraped CSS/HTML
+- Read their existing copy to understand their services, tone, certifications, and offers
+- Identify their real business details (hours, license #, years in business, reviews)
+Report what you found before proceeding.
+
+═══════════════════════════════════
+STEP 2 — BUILD A $30K SITE WITH THEIR REAL BRAND
+═══════════════════════════════════
+Rebuild their website as a premium, modern 2026 site. Use:
+- THEIR real logo (from assets/logos)
+- THEIR real project photos (from assets/images)
+- THEIR real brand colors (extracted in Step 1) — or upgrade to a more premium version if theirs are weak
+- THEIR real copy as the SOURCE, but REWRITE it to be high-converting, confident, and original
+
+TECH STACK:
+- Next.js 14 App Router + TypeScript + Tailwind CSS
+- Framer Motion (component animations) + GSAP + ScrollTrigger (scroll effects)
+- Lenis smooth scroll (sync to GSAP ticker in lib/scroll.ts)
+- Three.js particle hero (desktop only, static image fallback mobile)
+- Lucide icons, next/image for all images
+
+DESIGN SYSTEM:
+- Dark premium theme unless their brand demands light
+- Single strong accent from their brand color
+- Syne for headings, Inter for body
+- Glassmorphism cards, magnetic CTA buttons, scroll-reveal on every section
+- Full-viewport hero, full-bleed imagery, generous whitespace
+
+REQUIRED SECTIONS (all pages):
+Hero (with their logo + real photo) → Proof strip → Services grid →
+About/credibility → Before/after gallery (their real project photos) →
+Process → Testimonials → Quote/contact form → Service areas → Strong CTA band → Footer
+
+REQUIRED PAGES:
+/ /about /services /services/[slug] /projects /reviews /contact /service-areas/[city]
+
+═══════════════════════════════════
+STEP 3 — COPY (use your copywriting + research skills)
+═══════════════════════════════════
+- Rewrite ALL copy: confident, simple, trust-first, high-converting
+- Zero lorem ipsum — real [INDUSTRY] industry language
+- Every page ends with a CTA band
+- 6 FAQs per service page, 6 per city page
+- Trust signals throughout: licensed/insured, warranty, fast response, reviews
+
+═══════════════════════════════════
+STEP 4 — SEO + PERFORMANCE
+═══════════════════════════════════
+- Unique meta title + description per page (city-specific)
+- JSON-LD schema: LocalBusiness, Service, FAQPage, AggregateRating
+- All images: next/image, lazy load, alt text
+- Mobile-first, tested at 375px
+- Sticky mobile CTA bar (call + quote buttons)
+
+═══════════════════════════════════
+STEP 5 — CONSTANTS
+═══════════════════════════════════
+Put ALL business data in lib/constants.ts (single source of truth).
+This becomes my swap template for the next client.
+
+═══════════════════════════════════
+COST DISCIPLINE
+═══════════════════════════════════
+Use Sonnet for the build. Only escalate to Opus for the Three.js hero if needed.
+Build section by section. After every 5 files, verify imports resolve.
+Run npm run build before declaring done — zero TypeScript errors required.
+
+Start with Step 1 (asset inventory). Report findings, then proceed.</div>
+  </div>
+</section>
+
+<section class="sec" id="prompt-reference">
+  <div class="sh"><div class="si i-cy">📋</div><h2 class="st">Prompt B — Reference Design + Their Real Assets</h2></div>
+  <div class="pblock cy">
+    <div class="phead"><span class="plabel">⭐ Path B — Reference + Client Assets Prompt</span><button class="bigcopy cy" id="pB" onclick="cid('pBt','pB')">📋 Copy</button></div>
+    <div class="pbody" id="pBt">Act as a senior software engineer and conversion-focused web designer with 30+ years of experience building $30,000 premium websites (Next.js, Framer Motion, GSAP, Three.js, high-converting AI-SEO copy).
+
+I have just cloned a REFERENCE website whose design, layout, animations, hovers, and structure I want to replicate. Separately, I have downloaded the CLIENT's real brand assets (logo, photos, colors) into the ./assets folder.
+
+Your job: keep the reference's premium DESIGN and MOTION, but rebuild it as the CLIENT's website using THEIR real brand.
+
+═══════════════════════════════════
+INPUTS
+═══════════════════════════════════
+Reference site (already cloned in this project): [REFERENCE_URL]
+  → Use its: layout, section order, animation style, hover effects, scroll behavior, component design
+Client business: [COMPANY_NAME]
+Client industry: [INDUSTRY]
+Client phone: [PHONE]
+Client city/state: [CITY_STATE]
+Client assets: ./assets/ (real logo, photos, brand colors)
+
+═══════════════════════════════════
+STEP 1 — STUDY BOTH
+═══════════════════════════════════
+1. Analyze the cloned reference site's structure: what sections, what animations, what makes it feel $30K
+2. Inventory ./assets: list the client's real logo, images, and extract their brand colors
+Report both before building.
+
+═══════════════════════════════════
+STEP 2 — MERGE: REFERENCE DESIGN + CLIENT BRAND
+═══════════════════════════════════
+Rebuild the site so it has:
+- The reference's LAYOUT and section flow
+- The reference's ANIMATIONS (scroll reveals, parallax, hovers, transitions)
+- The reference's COMPONENT DESIGN (card styles, button styles, nav)
+- BUT the client's real LOGO, PHOTOS, COLORS, and CONTENT
+- Original rewritten COPY specific to the client's [INDUSTRY] business
+
+Do NOT copy the reference's text or images. Only its design language and interaction patterns.
+Swap every visual asset for the client's real assets from ./assets.
+Swap the color system to the client's brand (or a premium upgrade of it).
+
+═══════════════════════════════════
+TECH STACK
+═══════════════════════════════════
+Next.js 14 + TypeScript + Tailwind + Framer Motion + GSAP ScrollTrigger + Lenis + Three.js (hero)
+Use the UI/UX Pro Max skill for design decisions and emilkowalski/skill for animation quality.
+Pull any missing premium components from the 21st.dev Magic MCP (/ui command).
+
+═══════════════════════════════════
+STEP 3 — PAGES, COPY, SEO
+═══════════════════════════════════
+Pages: / /about /services /services/[slug] /projects /reviews /contact /service-areas/[city]
+Copy: high-converting, original, trust-first, zero lorem ipsum, 6 FAQs per service + city page
+SEO: unique meta per page, JSON-LD (LocalBusiness/Service/FAQPage/AggregateRating), city-specific
+Every page ends with a CTA band. Sticky mobile call+quote bar.
+All business data in lib/constants.ts.
+
+═══════════════════════════════════
+COST DISCIPLINE
+═══════════════════════════════════
+Sonnet for the build; Opus only for complex 3D. Section by section. npm run build must pass.
+
+Start with Step 1. Report your analysis of both the reference and the assets, then build.</div>
+  </div>
+</section>
+
+<section class="sec" id="prompt-scratch">
+  <div class="sh"><div class="si i-gn">📋</div><h2 class="st">Prompt C — From Scratch (No Existing Site)</h2></div>
+  <div class="pblock gn">
+    <div class="phead"><span class="plabel">⭐ Path C — From-Scratch Prompt</span><button class="bigcopy gn" id="pC" onclick="cid('pCt','pC')">📋 Copy</button></div>
+    <div class="pbody" id="pCt">Act as a senior software engineer, conversion-focused web designer, and SEO strategist with 30+ years of experience building $30,000 premium websites (Next.js, Framer Motion, GSAP scroll effects, Three.js 3D, high-converting AI-SEO-optimized copy).
+
+The client has NO usable website. Build them a $30K site from scratch. They've provided minimal assets (in ./assets — likely just a logo). Generate everything else.
+
+═══════════════════════════════════
+CLIENT INFO
+═══════════════════════════════════
+Business: [COMPANY_NAME]
+Industry: [INDUSTRY]
+Phone: [PHONE]
+Email: [EMAIL]
+City/State: [CITY_STATE]
+Service Areas: [CITIES]
+Services offered: [LIST or "you determine standard services for this industry"]
+Brand color: [HEX or "derive from logo in ./assets, or pick a premium palette"]
+Assets: ./assets (logo at minimum)
+
+═══════════════════════════════════
+WHAT YOU GENERATE
+═══════════════════════════════════
+- ALL copy (confident, high-converting, trust-first, original, zero lorem ipsum)
+- Full site structure and all pages
+- Design system (dark premium theme, single accent, Syne + Inter)
+- For images: use Unsplash URLs relevant to [INDUSTRY], OR if the Higgsfield MCP is
+  connected, generate hero/service/team images with it (Nano Banana Pro for any text
+  overlays, Soul 2.0 for people, Seedream for location shots)
+
+═══════════════════════════════════
+TECH STACK
+═══════════════════════════════════
+Next.js 14 App Router + TypeScript + Tailwind + Framer Motion + GSAP ScrollTrigger +
+Lenis smooth scroll + Three.js particle hero (desktop) with mobile photo fallback.
+Use UI/UX Pro Max skill for design + emilkowalski/skill for animations.
+Pull premium components from 21st.dev Magic MCP via /ui.
+
+═══════════════════════════════════
+STRUCTURE
+═══════════════════════════════════
+Pages: / /about /services /services/[slug] /projects /reviews /contact /service-areas/[city] /blog
+Every page: hero → content sections → testimonials module → CTA band → footer
+Sticky mobile CTA bar (call + primary action).
+6 FAQs per service page and per city page.
+
+═══════════════════════════════════
+COPY RULES (use research + copywriting skills)
+═══════════════════════════════════
+- Simple, confident, trust-first, no fluff
+- Trust signals everywhere: licensed/insured, warranties, fast response, reviews
+- Industry-accurate terminology for [INDUSTRY]
+- High-converting CTAs: primary action + "Call Now" secondary, everywhere
+
+═══════════════════════════════════
+SEO + PERFORMANCE
+═══════════════════════════════════
+Unique meta per page, JSON-LD (LocalBusiness/Service/FAQPage/AggregateRating),
+city-specific landing pages, next/image + lazy load + alt text, mobile-first at 375px.
+
+All business data in lib/constants.ts (single source of truth = swap template for next client).
+
+═══════════════════════════════════
+COST DISCIPLINE
+═══════════════════════════════════
+Sonnet for the build; Opus only for 3D hero. Section by section. npm run build passes clean.
+
+Ask me any clarifying questions about the client's services or offers, then build.</div>
+  </div>
+</section>
+
+<section class="sec" id="prompt-any-industry">
+  <div class="sh"><div class="si i-pu">📋</div><h2 class="st">Prompt D — Any Industry (Plumber, Electrician, Barber, Restaurant, Pest Control)</h2></div>
+  <div class="co co-pu"><span class="ci">🎯</span><div><strong>This is the universal version.</strong> Same $30K quality as roofing, for any local service business. Works with Firecrawl assets (Path A) or from scratch (Path C). Just set the [INDUSTRY] and the industry-specific sections.</div></div>
+  <div class="pblock pu">
+    <div class="phead"><span class="plabel">⭐ Universal — Any Local Business Prompt</span><button class="bigcopy pu" id="pD" onclick="cid('pDt','pD')">📋 Copy</button></div>
+    <div class="pbody" id="pDt">Act as a senior software engineer, conversion web designer, and SEO strategist with 30+ years of experience building $30,000 premium websites. Stack: Next.js, Framer Motion, GSAP scroll effects, Three.js, high-converting AI-SEO copy.
+
+Build a $30K premium website for a local [INDUSTRY] business, same quality as a top-tier roofing or contractor site.
+
+═══════════════════════════════════
+CLIENT
+═══════════════════════════════════
+Business: [COMPANY_NAME]
+Industry: [plumber / electrician / barber / restaurant / pest control / HVAC / landscaper / etc]
+Phone: [PHONE]  Email: [EMAIL]  City/State: [CITY_STATE]  Areas: [CITIES]
+Assets: ./assets (Firecrawled from their old site, or client-provided logo)
+Brand color: [HEX or "derive from assets"]
+
+═══════════════════════════════════
+INDUSTRY-ADAPT THE STRUCTURE
+═══════════════════════════════════
+Adapt sections to the industry. Examples:
+- PLUMBER/ELECTRICIAN/HVAC: emergency service banner, service grid, "how it works",
+  financing, service-area pages, before/after, reviews, book-online CTA
+- BARBER/SALON: services + pricing menu, gallery of cuts, book-appointment (prominent),
+  team/barbers with bios, hours, reviews, Instagram feed embed
+- RESTAURANT: hero with food photography, menu (with prices), reservations, gallery,
+  hours + location map, order-online CTA, events/catering
+- PEST CONTROL: pest-type service grid, "signs you have X", treatment process,
+  guarantee/warranty, service plans, free-inspection CTA, service areas
+
+Pick the right sections for [INDUSTRY]. Keep the premium design language constant:
+dark theme, single accent, Syne + Inter, glassmorphism, scroll animations, magnetic CTAs.
+
+═══════════════════════════════════
+IF ASSETS EXIST (Path A/B)
+═══════════════════════════════════
+Inventory ./assets first. Use the client's real logo, photos, colors.
+Rewrite their existing copy to be high-converting and original.
+
+IF NO ASSETS (Path C)
+Generate all copy. Use Unsplash images relevant to [INDUSTRY], or Higgsfield MCP if connected.
+
+═══════════════════════════════════
+TECH + PAGES + SEO (same premium standard)
+═══════════════════════════════════
+Next.js 14 + TS + Tailwind + Framer Motion + GSAP + Lenis + Three.js hero.
+UI/UX Pro Max + emilkowalski skills. 21st.dev Magic MCP for components.
+Pages: / /about /services /services/[slug] /[gallery-or-menu] /reviews /contact /service-areas/[city]
+Copy: confident, trust-first, original, industry-accurate, 6 FAQs per service + city page.
+SEO: unique meta, JSON-LD (LocalBusiness/Service/FAQPage/AggregateRating), city pages.
+Mobile-first, sticky mobile CTA bar, all data in lib/constants.ts.
+
+═══════════════════════════════════
+COST DISCIPLINE
+═══════════════════════════════════
+Sonnet for build; Opus only for 3D. Section by section. npm run build passes clean.
+
+Ask me about the client's specific services and offers, then build.</div>
+  </div>
+</section>
+
+<!-- ═══════════════ ORCHESTRATION ═══════════════ -->
+<div class="pb pb-bl">
+  <div class="pbn" style="color:var(--bl)">$</div>
+  <div class="pbb">
+    <div class="pbt" style="color:var(--bl)">Cost-Saving Orchestration</div>
+    <div class="pbs">The manager/worker system that stops you burning credits. This is your "Fable-as-manager, Opus-as-worker" idea done right.</div>
+  </div>
+</div>
+
+<section class="sec" id="orchestration">
+  <div class="sh"><div class="si i-bl">🎭</div><h2 class="st">Manager/Worker Orchestration — Stop Burning Credits</h2></div>
+
+  <p>Your instinct is correct: don't run your most expensive model for the whole build. Use a <strong>planner/reviewer</strong> (strong model, short bursts) and <strong>workers</strong> (cheaper Sonnet, doing the heavy lifting). Here's the practical setup.</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Role</th><th>Model</th><th>What it does</th><th>Token cost</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Planner / Reviewer</strong></td><td>Opus 4.8 (short bursts)</td><td>Writes the build spec, reviews worker output, decides next steps. Runs briefly, not continuously.</td><td>Low (short sessions)</td></tr>
+        <tr><td><strong>Worker (build)</strong></td><td>Sonnet 4.6</td><td>Executes the spec — writes all the sections, components, pages. 90% of the work.</td><td>Cheap</td></tr>
+        <tr><td><strong>Scaffolder</strong></td><td>Gemini 2.5 Pro (free)</td><td>Full site skeleton before Claude touches it. Zero cost.</td><td>Free</td></tr>
+        <tr><td><strong>Reviewer (final)</strong></td><td>sanyuan-skills</td><td>Code review pass — SOLID, security, edge cases before ship.</td><td>Minimal</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pblock bl" style="border-color:rgba(66,133,244,.45)">
+    <div class="phead" style="background:rgba(66,133,244,.1);border-bottom-color:rgba(66,133,244,.25)"><span class="plabel" style="color:var(--bl)">The Orchestration Setup Prompt (run once at project start)</span><button class="bigcopy" style="background:var(--bl)" id="pO" onclick="cid('pOt','pO')">📋 Copy</button></div>
+    <div class="pbody" id="pOt">Set up a cost-efficient manager/worker workflow for this build using spec-driven development (get-shit-done methodology).
+
+YOU (this session) are the PLANNER/REVIEWER. Your job:
+1. Read the master build prompt and the ./assets folder
+2. Write a detailed build SPEC to ./BUILD_SPEC.md — break the site into discrete,
+   independent tasks (one per section/page), each with acceptance criteria
+3. For each task, I will run a separate cheaper Sonnet worker session that reads
+   BUILD_SPEC.md and builds ONLY that task
+4. After each worker finishes, you review its output against the spec's acceptance
+   criteria and tell me: PASS, or FIX with specific instructions
+5. You do NOT write the implementation code yourself — you plan and review only
+
+TOKEN DISCIPLINE:
+- Use the supermemory skill so context persists without re-reading everything
+- Use Serena MCP for semantic code understanding (no full-file re-reads)
+- Keep your planning/review responses concise
+- Reference BUILD_SPEC.md by task number instead of re-explaining
+
+Start by writing BUILD_SPEC.md now. Break the [INDUSTRY] site into tasks:
+constants.ts → design system → layout components → each homepage section →
+each interior page → animation layer → SEO → QA.
+List them numbered with acceptance criteria for each. Then stop and wait —
+I'll dispatch workers one task at a time.</div>
+  </div>
+
+  <div class="co co-gn">
+    <span class="ci">💡</span>
+    <div><strong>How to run it in practice:</strong> Open your planner session (Opus). It writes <code>BUILD_SPEC.md</code>. Then open a <em>separate</em> Sonnet session and say "Read BUILD_SPEC.md and build Task 3." When it's done, paste the result summary back to the planner: "Worker finished Task 3, here's what it did: [summary]." Planner reviews and says PASS or FIX. Repeat. The planner only runs in short bursts = low Opus cost. The workers do the heavy lifting on cheap Sonnet.</div>
+  </div>
+</section>
+
+<section class="sec" id="memory">
+  <div class="sh"><div class="si i-gn">🧠</div><h2 class="st">Token-Saving Tools — Install These to Slash Costs</h2></div>
+  <div class="g2">
+    <div class="card c-gn"><div class="ct">supermemory <span class="tag t-gn">Memory</span></div><div class="cd">Persistent memory across sessions, runs local. Claude stops re-reading your whole context each turn. <code>npx skills add supermemory</code></div></div>
+    <div class="card c-cy"><div class="ct">Serena MCP <span class="tag t-cy">Semantic</span></div><div class="cd">Semantic code understanding — Claude navigates your codebase by structure, not by re-reading every file. Huge token saver on big projects.</div></div>
+    <div class="card c-pu"><div class="ct">caveman <span class="tag t-pu">−65%</span></div><div class="cd">Cuts 65% of tokens by making Claude's internal reasoning terse. Use on scaffolding + boilerplate sessions where you don't need verbose thinking.</div></div>
+    <div class="card c-yw"><div class="ct">gitingest <span class="tag t-yw">Clean Context</span></div><div class="cd">Swap 'hub' for 'ingest' in any GitHub URL to get the whole repo as one clean prompt. Feed reference repos to Claude without token bloat. From your screenshots.</div></div>
+    <div class="card c-or"><div class="ct">crawl4ai <span class="tag t-or">Clean MD</span></div><div class="cd">Turns any website into clean markdown Claude can read — far fewer tokens than raw HTML. Alternative/companion to Firecrawl. From your screenshots.</div></div>
+    <div class="card c-bl"><div class="ct">docling <span class="tag t-bl">Docs → MD</span></div><div class="cd">PDFs and Word files into structured markdown, no OCR bill. Use to feed client brand guidelines / briefs to Claude cheaply. From your screenshots.</div></div>
+  </div>
+</section>
+
+<!-- ═══════════════ BONUS SYSTEMS ═══════════════ -->
+<div class="pb pb-yw">
+  <div class="pbn" style="color:var(--yw)">+</div>
+  <div class="pbb">
+    <div class="pbt" style="color:var(--yw)">Bonus Systems</div>
+    <div class="pbs">Image generation, no-code alternatives, and the reference-image trick.</div>
+  </div>
+</div>
+
+<section class="sec" id="higgsfield">
+  <div class="sh"><div class="si i-yw">🎨</div><h2 class="st">Higgsfield — Generate Every Image the Site Needs</h2></div>
+  <p>From your PDF. When a client has no photos (or bad ones), Higgsfield generates hero shots, before/afters, team photos, and location images — 30+ models behind one MCP. ~$3–8 for a full site's imagery vs $500–2,000 for a photographer.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Need</th><th>Model</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Text in the image (price, badge, "FREE INSPECTION")</td><td><strong>Nano Banana Pro</strong></td><td>Only model that renders text reliably — reasoning engine, spells correctly.</td></tr>
+      <tr><td>People / lifestyle (team photo, customer using service)</td><td><strong>Soul 2.0</strong></td><td>Best photorealism for people. Soul ID keeps faces consistent.</td></tr>
+      <tr><td>Product / detail shots</td><td><strong>GPT Image 2</strong></td><td>Best for product composites + near-perfect text.</td></tr>
+      <tr><td>Location / outdoor / building shots</td><td><strong>Seedream 4.0</strong></td><td>Best environmental + architectural rendering, natural light.</td></tr>
+      <tr><td>Brand aesthetic / specific style</td><td><strong>Flux 2</strong></td><td>Best at interpreting stylistic direction.</td></tr>
+      <tr><td>Animate a static hero into video</td><td><strong>Kling 3.0</strong></td><td>Best image-to-video, camera control, smooth motion.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="cb"><div class="ch">Add Higgsfield MCP (Claude Desktop → Settings → Connectors → Add custom connector)<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">Name: Higgsfield
+URL:  https://mcp.higgsfield.ai/mcp
+# Sign in with Higgsfield account → Approve → green Connected badge
+# Test: "List my Higgsfield models and show my credit balance"</div></div>
+  <div class="co co-yw"><span class="ci">🖼️</span><div><strong>Image generation prompt for a site build:</strong> "Using Higgsfield, generate a hero image for a [INDUSTRY] company in [CITY]: [describe scene]. Use Seedream 4.0 for the location shot. 1920x1080. Then generate 3 service images and 1 team photo with Soul 2.0. Save all to ./assets/images/generated/."</div></div>
+</section>
+
+<section class="sec" id="nocode">
+  <div class="sh"><div class="si i-cy">🏗️</div><h2 class="st">The No-Code Alternatives — When to Use Them Instead</h2></div>
+  <p>You mentioned Relume, Framer, and Omma. Here's the honest breakdown of when each beats Claude Code, and when it doesn't.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Tool</th><th>Best for</th><th>Cost</th><th>Verdict for you</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Claude Code</strong></td><td>Custom $30K sites, 3D, full control, real code you own</td><td>API tokens</td><td><span class="tag t-gn">Your main tool</span> — most control, best quality, you own the code</td></tr>
+      <tr><td><strong>Relume</strong></td><td>Fast sitemaps + wireframes → export to Webflow/Figma/React. 1,000+ components.</td><td>$18–40/mo</td><td><span class="tag t-cy">Use for structure</span> — great to generate the sitemap/wireframe FAST, then build in Claude Code</td></tr>
+      <tr><td><strong>Framer</strong></td><td>Design-first, prompt-to-live-site, publishes itself, CMS built in</td><td>Free–$$/mo</td><td><span class="tag t-yw">Fast client demos</span> — when you need something live TODAY and don't need custom code</td></tr>
+      <tr><td><strong>Omma.build</strong></td><td>3D-effect websites via prompt</td><td>Varies</td><td><span class="tag t-pu">3D shortcut</span> — try for quick 3D hero concepts, then rebuild premium in Claude</td></tr>
+      <tr><td><strong>Gemini AI Studio</strong></td><td>Free full-site scaffold, 1M context</td><td>Free</td><td><span class="tag t-gn">Free scaffolding</span> — build skeleton free, polish in Claude Code</td></tr>
+    </tbody>
+  </table></div>
+  <div class="co co-cy"><span class="ci">🎯</span><div><strong>The cheapest premium workflow:</strong> Relume (or Gemini, free) generates the sitemap + wireframe structure → export/download → Claude Code (Sonnet workers) builds it premium with your skills + animations → deploy to Vercel. You get Relume's speed on structure + Claude's quality on execution, without burning Opus credits on the boring parts.</div></div>
+</section>
+
+<section class="sec" id="assets-reference">
+  <div class="sh"><div class="si i-pu">🖼️</div><h2 class="st">The Reference-Image Trick — 3 Screenshots = Better Output</h2></div>
+  <p>Before any build, save the full homepage of 3 sites you love and feed them to Claude as reference images. Multimodal models read layout from images far better than from words.</p>
+  <div class="steps">
+    <div class="step"><div class="sl"><div class="sn pu">1</div><div class="sline"></div></div><div class="sc"><div class="stitle">Find 3 reference sites you love</div><div class="stext">For roofing: roofez.net, aaroofinghawaii.com, therivaldgroup.com. For other industries, browse awwwards.com + landing.love for that vertical.</div></div></div>
+    <div class="step"><div class="sl"><div class="sn pu">2</div><div class="sline"></div></div><div class="sc"><div class="stitle">Save the full homepage of each</div><div class="stext">Use a full-page screenshot tool (GoFullPage Chrome extension) to capture the entire scroll of each. Save to <code>assets/references/</code>.</div></div></div>
+    <div class="step"><div class="sl"><div class="sn pu">3</div></div><div class="sc"><div class="stitle">Attach them + this line to your build prompt</div><div class="stext">Add: "I've attached 3 reference screenshots in assets/references. Use their visual design language, section layout, spacing, and animation style as inspiration — but build for [CLIENT] with their assets. Don't copy their content."</div></div></div>
+  </div>
+</section>
+
+
+<!-- ═══════════════ /ROUTE FABLE+SOL ═══════════════ -->
+<section class="sec" id="route-setup">
+  <div class="sh"><div class="si i-bl">🤖</div><h2 class="st">⭐ The /route Command — Fable 5 as Boss, GPT-5.6 Sol as Worker</h2></div>
+
+  <div class="co co-bl">
+    <span class="ci">🎯</span>
+    <div><strong>This is exactly the setup you described.</strong> OpenAI shipped an official plugin (March 30, 2026) that installs inside Claude Code and hands work to Codex. You wire <strong>Fable 5 as the boss that plans + reviews</strong>, and <strong>GPT-5.6 Sol as the worker that builds + fixes</strong>. It only runs when you type <code>/route</code>, so it never burns your limits on ordinary prompts. Fable plans → hands build to Sol → reviews the diff → sends fixes down until clean.</div>
+  </div>
+
+  <h3>Prerequisites</h3>
+  <div class="cd" style="margin-bottom:12px">
+    • Node.js v18+ (Codex CLI needs it) &nbsp;•&nbsp; Claude Code installed + signed in &nbsp;•&nbsp; OpenAI account with Codex access (ChatGPT Plus/Pro/Team subscription — GPT-5.6 usage bills to that subscription, not per-token)
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="sl"><div class="sn bl">1</div><div class="sline"></div></div><div class="sc">
+      <div class="stitle">Install the Codex plugin (run inside Claude Code, in order)</div>
+      <div class="stext"><div class="cb"><div class="ch">Inside Claude Code — the last line is the most-skipped + most important<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">/plugin marketplace add openai/codex-plugin-cc
+/plugin install codex@openai-codex
+/reload-plugins
+/codex:setup</div></div>
+      This unlocks <code>/codex:review</code> (review current diff), <code>/codex:rescue</code> (hand off a stuck task), and the raw <code>codex exec</code> command the /route skill drives.</div></div>
+
+    <div class="step"><div class="sl"><div class="sn bl">2</div><div class="sline"></div></div><div class="sc">
+      <div class="stitle">Point Codex at GPT-5.6 Sol</div>
+      <div class="stext"><div class="cb"><div class="ch">Terminal — update first, then confirm the exact model id<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">codex update
+codex login              # choose "Sign in with ChatGPT"
+codex /codex:status      # confirms CLI is current + lists models it can see
+                         # (includes gpt-5.6-sol once available on your account)</div></div></div></div>
+
+    <div class="step"><div class="sl"><div class="sn bl">3</div><div class="sline"></div></div><div class="sc">
+      <div class="stitle">Set Sol as the default worker (create .codex/config.toml in project root)</div>
+      <div class="stext"><div class="cb"><div class="ch">.codex/config.toml<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody"># .codex/config.toml
+model = "gpt-5.6-sol"
+
+[profiles.reviewer]
+model = "gpt-5.6-sol"
+model_reasoning_effort = "xhigh"</div></div></div></div>
+
+    <div class="step"><div class="sl"><div class="sn bl">4</div></div><div class="sc">
+      <div class="stitle">Install the /route skill</div>
+      <div class="stext">Save the SKILL.md below to <code>~/.claude/skills/route/SKILL.md</code>, then restart / reload-plugins so it registers.</div></div></div>
+  </div>
+
+  <div class="pblock bl" style="border-color:rgba(66,133,244,.45)">
+    <div class="phead" style="background:rgba(66,133,244,.1);border-bottom-color:rgba(66,133,244,.25)"><span class="plabel" style="color:var(--bl)">~/.claude/skills/route/SKILL.md — copy-paste ready</span><button class="bigcopy" style="background:var(--bl)" id="pRoute" onclick="cid('pRouteT','pRoute')">📋 Copy</button></div>
+    <div class="pbody" id="pRouteT">---
+name: route
+description: >-
+  On-demand two-model build loop. Fable 5 is the boss: it plans and reviews.
+  GPT-5.6 Sol is the worker: it builds and fixes. The loop runs until Fable
+  approves. Trigger ONLY when the user types /route, says "route this", "run the
+  route loop", or explicitly asks for the Fable-plus-Sol loop. Do NOT use for
+  ordinary single-model coding, planning, refactors, or chat.
+---
+
+# Route: Fable 5 runs GPT-5.6 Sol
+
+You are Fable 5, the boss. You PLAN and you REVIEW. You do not write the
+implementation yourself. GPT-5.6 Sol is the worker that builds and fixes. Work
+travels around the loop until you approve it.
+
+## The loop
+1. Restate the task in one line. Write a concrete, step-by-step plan and save it
+   as PLAN.md.
+2. Hand the build to GPT-5.6 Sol:
+   codex exec --model gpt-5.6-sol -s workspace-write -c model_reasoning_effort=high
+   "Implement PLAN.md exactly. Write the code."
+   (the -s workspace-write flag is required, or Sol runs read-only and cannot
+   write files).
+3. Review what Sol built. Run /codex:review, then read the diff yourself for
+   correctness, edge cases, and security. You are the quality gate.
+4. If anything is wrong, send the specific findings back to Sol to fix with
+   another codex exec call. Repeat build, review, fix until you approve.
+5. Report back: what you had Sol build, what you sent back, and the final result.
+
+## Rules
+- You (Fable) never write the implementation. Sol does. You plan and review.
+- Loop until you approve. Never accept the first pass.
+- Treat your own review as adversarial: your job is to catch what Sol missed.
+- This skill is manual. It runs only when invoked with /route, never on an
+  ordinary prompt.</div>
+  </div>
+
+  <div class="cb"><div class="ch">Run the demo — watch Fable plan, dispatch Sol, catch mistakes, loop<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">/route "build the services grid section per BUILD_SPEC.md task 4, with GSAP scroll reveals and glassmorphism cards"
+
+# 1. Fable plans   → writes PLAN.md before anything is built
+# 2. Sol builds    → codex exec writes the actual code
+# 3. Fable reviews → runs /codex:review + reads the diff, hunting for misses
+# 4. Loop repeats  → anything wrong goes back to Sol; Fable never approves pass 1</div></div>
+
+  <div class="co co-yw"><span class="ci">⚠️</span><div><strong>The honest fine print:</strong> <code>gpt-5.6-sol</code> is the model id as shipped. If Codex rejects it, run <code>/codex:status</code> to confirm the current id and swap it into <code>.codex/config.toml</code>. The loop itself — plan → build → adversarial review — works the same regardless of the exact model name. Also note: if a pinned Claude model isn't on your account, Claude Code silently falls back to your session model, so check your plan if results feel off.</div></div>
+
+  <div class="co co-gn"><span class="ci">💰</span><div><strong>Why this saves you money:</strong> The expensive planning/review model (Fable) only runs in short bursts. The heavy building runs on GPT-5.6 Sol, which bills to your flat ChatGPT subscription instead of per-token Claude usage. You're directing a two-model team instead of babysitting one expensive model through the whole build. This is the single biggest fix for your credit burn.</div></div>
+</section>
+
+<!-- ═══════════════ ELEMENT LIBRARY ═══════════════ -->
+<div class="pb pb-pu">
+  <div class="pbn" style="color:var(--pu)">&lt;/&gt;</div>
+  <div class="pbb">
+    <div class="pbt" style="color:var(--pu)">The 10K Element Library — Real Code</div>
+    <div class="pbs">The specific elements every $10K+ site has. Copy the code directly, or paste the Cursor/Claude prompt. Drop these into any build.</div>
+  </div>
+</div>
+
+<section class="sec" id="elements">
+  <div class="sh"><div class="si i-pu">✨</div><h2 class="st">The Elements That Make a $10K Site</h2></div>
+  <p>These are the details clients can never name but always notice. Cursor effects, menu animations, infinite carousels, micro-interactions, typography systems, and the shape-blur glow. Every one includes real code + a prompt to have Claude/Cursor build it.</p>
+  <div class="g3">
+    <div class="card c-pu"><div class="ct">01 Cursor Effects</div><div class="cd">Magnetic, trail/blob, spotlight, custom SVG. First thing visitors notice — signals craft.</div></div>
+    <div class="card c-cy"><div class="ct">02 Menu Effects</div><div class="cd">Fullscreen overlay, slide-in drawer, mega menu, sticky hide-on-scroll.</div></div>
+    <div class="card c-gn"><div class="ct">03 Infinite Carousel</div><div class="cd">Marquee/ticker for logos, tags, testimonials. Zero JS with pure CSS.</div></div>
+    <div class="card c-or"><div class="ct">04 Micro-interactions</div><div class="cd">Button hovers, focus rings, skeletons, scroll reveals, toasts.</div></div>
+    <div class="card c-yw"><div class="ct">05 Typography System</div><div class="cd">Font pairing + fluid clamp() scale. The #1 fix for "looks cheap".</div></div>
+    <div class="card c-bl"><div class="ct">★ Shape Blur</div><div class="cd">Glowing cursor-reactive blur blob. On every AI/SaaS landing page right now.</div></div>
+  </div>
+</section>
+
+<section class="sec" id="cursor-fx">
+  <div class="sh"><div class="si i-pu">🖱️</div><h2 class="st">01 — Cursor Effects</h2></div>
+  <p>A custom cursor is the first thing visitors notice — it signals craft. Four types: <strong>magnetic</strong> (snaps toward buttons), <strong>trail/blob</strong> (glowing shape follows with lag), <strong>spotlight</strong> (circle of light on dark bg), <strong>custom SVG</strong> (branded icon replaces arrow).</p>
+  <div class="cb"><div class="ch">globals.css — spotlight cursor<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">body { cursor: none; }
+.cursor {
+  position: fixed; pointer-events: none; z-index: 9999;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(249,115,22,0.6);   /* your brand accent */
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease, width 0.2s, height 0.2s;
+}</div></div>
+  <div class="cb"><div class="ch">JS — attach cursor movement + hover scale<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">const cursor = document.querySelector('.cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top  = e.clientY + 'px';
+});
+document.querySelectorAll('a,button').forEach(el => {
+  el.addEventListener('mouseenter', () =>
+    cursor.style.transform = 'translate(-50%,-50%) scale(2)');
+  el.addEventListener('mouseleave', () =>
+    cursor.style.transform = 'translate(-50%,-50%) scale(1)');
+});</div></div>
+  <div class="co co-pu"><span class="ci">💬</span><div><strong>Prompt:</strong> "Add a magnetic cursor effect to all .btn elements using GSAP" — or — "Add a spotlight cursor: dark overlay with a circle of light following the pointer, disabled on mobile."</div></div>
+</section>
+
+<section class="sec" id="menu-fx">
+  <div class="sh"><div class="si i-cy">☰</div><h2 class="st">02 — Menu Effects + 03 Infinite Carousel</h2></div>
+  <p>Navigation is on every page — a premium menu is one of the highest-ROI design decisions. Options: fullscreen overlay with staggered text, slide-in drawer, mega menu with hover preview, sticky hide-on-scroll.</p>
+  <div class="cb"><div class="ch">Fullscreen menu — core structure<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">&lt;nav class='nav'&gt;
+  &lt;button class='menu-toggle'&gt;Menu&lt;/button&gt;
+  &lt;div class='menu-overlay'&gt;
+    &lt;ul class='menu-links'&gt;
+      &lt;li&gt;&lt;a href='/'&gt;Home&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href='/services'&gt;Services&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href='/contact'&gt;Contact&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</div></div>
+  <div class="co co-cy"><span class="ci">💬</span><div><strong>Prompt:</strong> "Animate the menu links with a stagger effect using Framer Motion" — or — "Make the navbar sticky and hide on scroll down, reappear on scroll up."</div></div>
+
+  <h3>03 — Infinite Carousel (Marquee)</h3>
+  <p>Also called a marquee or ticker — logos, testimonials, or service tags in a seamless auto-scrolling loop. Zero JS with pure CSS. Duplicate the track for the seamless loop.</p>
+  <div class="cb"><div class="ch">Pure CSS infinite scroll (with pause-on-hover)<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">/* HTML: duplicate items inside .track for seamless loop */
+.marquee { overflow: hidden; white-space: nowrap; }
+.track {
+  display: inline-flex; gap: 48px;
+  animation: scroll 20s linear infinite;
+}
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee:hover .track { animation-play-state: paused; }</div></div>
+  <div class="co co-gn"><span class="ci">🎨</span><div><strong>Variations:</strong> reverse direction for tension · two rows scrolling opposite (logo wall) · image cards instead of text (client logos, project thumbnails) · slow scroll for testimonials, fast for tech-stack logos. <strong>Prompt:</strong> "Create a vertical infinite carousel of testimonial cards with pause on hover."</div></div>
+</section>
+
+<section class="sec" id="micro">
+  <div class="sh"><div class="si i-or">⚡</div><h2 class="st">04 — Micro-interactions</h2></div>
+  <p>Tiny animations that make the interface feel alive. Clients can never name them, but always notice. Button hover (scale + shadow + color shift), form focus ring, loading skeleton, scroll-triggered reveal, toggle spring, toast notifications.</p>
+  <div class="cb"><div class="ch">Scroll-triggered reveal — CSS<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}</div></div>
+  <div class="cb"><div class="ch">IntersectionObserver — fires reveal once<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);   // fire once
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));</div></div>
+  <div class="co co-or"><span class="ci">⏱️</span><div>Keep toggle/spring animations under <strong>300ms</strong>. Every premium site uses scroll-triggered reveals — it's the baseline, not a bonus. In React, use Framer Motion's <code>whileInView</code> instead of the observer.</div></div>
+</section>
+
+<section class="sec" id="type-system">
+  <div class="sh"><div class="si i-yw">🔤</div><h2 class="st">05 — Typography System</h2></div>
+  <p>Bad typography is the #1 thing that makes a site look cheap. A proper scale + pairing makes it look like it cost twice as much.</p>
+  <div class="g3">
+    <div class="card c-yw"><div class="ct">Display (headlines)</div><div class="cd">Clash Display, Syne, PP Editorial — makes a statement</div></div>
+    <div class="card c-cy"><div class="ct">Body (reading)</div><div class="cd">Inter, Plus Jakarta Sans, DM Sans — clean + legible</div></div>
+    <div class="card c-pu"><div class="ct">Mono (code/tags)</div><div class="cd">JetBrains Mono, Geist Mono — technical credibility</div></div>
+  </div>
+  <div class="cb"><div class="ch">Fluid type scale — no media queries needed<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">:root {
+  --text-sm:   clamp(0.8rem, 1.5vw, 0.9rem);
+  --text-base: clamp(1rem, 2vw, 1.1rem);
+  --text-lg:   clamp(1.2rem, 2.5vw, 1.4rem);
+  --text-xl:   clamp(1.5rem, 3vw, 2rem);
+  --text-2xl:  clamp(2rem, 5vw, 3.5rem);
+  --text-3xl:  clamp(2.5rem, 7vw, 5rem);
+}
+h1 { font-size: var(--text-3xl); line-height: 1.1; }
+h2 { font-size: var(--text-2xl); line-height: 1.2; }
+p  { font-size: var(--text-base); line-height: 1.7; }</div></div>
+  <div class="co co-yw"><span class="ci">🆓</span><div>Load fonts via <strong>Fontshare.com</strong> or <strong>Bunny Fonts</strong> — free, fast, privacy-friendly. <strong>Prompt:</strong> "Make all section titles use a fluid clamp() type scale."</div></div>
+</section>
+
+<section class="sec" id="shape-blur">
+  <div class="sh"><div class="si i-bl">🌫️</div><h2 class="st">★ Bonus — Shape Blur Effect (Cursor-Reactive Glow)</h2></div>
+  <p>A soft glowing blurred shape that follows the cursor or sits behind content. On every AI/SaaS landing page right now — adds depth with zero imagery. Two modes: static ambient glow behind hero text, or cursor-reactive with lag.</p>
+  <div class="cb"><div class="ch">CSS — the blob (static glow)<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">.blur-shape {
+  position: absolute;
+  width: 420px; height: 420px;
+  background: radial-gradient(circle,
+    rgba(249,115,22,0.55), transparent 70%);   /* brand accent */
+  filter: blur(60px);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.blur-shape.follow { position: fixed; top: 0; left: 0; transition: transform 0.3s ease-out; }</div></div>
+  <div class="cb"><div class="ch">JS — make it follow the cursor with a lag<button class="copybtn" onclick="cc(this)">Copy</button></div><div class="cbody">const blob = document.querySelector('.blur-shape');
+let mouseX = 0, mouseY = 0, x = 0, y = 0;
+document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+function animate() {
+  x += (mouseX - x) * 0.08;   // lag factor — lower = dreamier trail
+  y += (mouseY - y) * 0.08;
+  blob.style.transform = `translate(${x - 210}px, ${y - 210}px)`;
+  requestAnimationFrame(animate);
+}
+animate();</div></div>
+  <div class="co co-bl"><span class="ci">💡</span><div>Lower the lag factor (0.08 → 0.04) for a slower trail · use 2–3 overlapping blobs in different colors for richness · keep z-index below text · disable cursor-follow on mobile (no mouse), keep static. <strong>Prompt:</strong> "Add a blurred radial gradient shape that follows the cursor with a smooth lag, behind the hero content."</div></div>
+
+  <h3>The $10K QA Checklist — Every Element Before Delivery</h3>
+  <div class="g2">
+    <div class="card c-pu"><div class="ct">Visual Polish</div><div class="cd">☐ Custom cursor (not default arrow)<br>☐ 8px-grid spacing system<br>☐ Fluid clamp() typography<br>☐ 2+ scroll-triggered reveals<br>☐ Hover state on every interactive element</div></div>
+    <div class="card c-cy"><div class="ct">Navigation</div><div class="cd">☐ Animated menu (overlay/drawer)<br>☐ Sticky / hide-on-scroll header<br>☐ Active state on nav links<br>☐ Mobile hamburger, smooth open/close</div></div>
+    <div class="card c-gn"><div class="ct">Motion & Feel</div><div class="cd">☐ Page transition (fade/slide between routes)<br>☐ Infinite carousel for social proof<br>☐ 1+ micro-interaction on a CTA<br>☐ Smooth scrolling (Lenis)</div></div>
+    <div class="card c-or"><div class="ct">Performance & Trust</div><div class="cd">☐ Images lazy-loaded + WebP<br>☐ LCP under 2.5s / Lighthouse 90+<br>☐ Meta tags + OG image<br>☐ Privacy analytics (Plausible/Fathom)<br>☐ 404 page with nav back</div></div>
+  </div>
+</section>
+
+<!-- ═══════════════ 4-LAYER FOUNDATION ═══════════════ -->
+<section class="sec" id="four-layer">
+  <div class="sh"><div class="si i-gn">🏛️</div><h2 class="st">The 4-Layer Foundation — The Minimum Stack (Free)</h2></div>
+  <div class="co co-gn"><span class="ci">🎯</span><div><strong>The simplest version of the whole system.</strong> Claude Code is only as good as the environment you give it. These 4 layers turn it from a generic code generator into a senior-level web designer. This is your fallback when you want the bare-minimum premium setup without the full machine.</div></div>
+  <div class="tw"><table>
+    <thead><tr><th>Layer</th><th>Tool</th><th>What it does</th><th>Install</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Code generation</strong></td><td>Claude Code</td><td>Builds + edits your site locally, reads full project, runs commands</td><td><code>npm install -g @anthropic-ai/claude-code</code></td></tr>
+      <tr><td><strong>Animation</strong></td><td>Framer Motion</td><td>The #1 thing that makes a site feel premium — scroll reveals, staggers, hovers</td><td><code>npm install framer-motion</code></td></tr>
+      <tr><td><strong>Design system</strong></td><td>frontend-design skill</td><td>Teaches Claude taste: spacing, hierarchy, type, color, layout. Stops the generic AI look</td><td>Add <code>.claude/skills/</code> + SKILL.md</td></tr>
+      <tr><td><strong>Components</strong></td><td>21st.dev</td><td>Production-ready UI blocks. Claude adapts them to your brand. Skips 80% of design work</td><td>Magic MCP or paste component code</td></tr>
+    </tbody>
+  </table></div>
+  <div class="co co-cy"><span class="ci">📝</span><div><strong>What to put in the frontend-design skill:</strong> a real typography scale (not random sizes), an 8px-base spacing system, color tokens (primary/neutral/accent — no random hex), component patterns (button states, card structure, form layouts), and explicit "avoid generic AI aesthetic" instructions. Without a design skill, Claude defaults to generic Tailwind patterns. With one, every component follows a consistent system.</div></div>
+  <div class="pblock gn">
+    <div class="phead"><span class="plabel">The 4-Layer Starter Prompt (after setup)</span><button class="bigcopy gn" id="pStarter" onclick="cid('pStarterT','pStarter')">📋 Copy</button></div>
+    <div class="pbody" id="pStarterT">Build a modern landing page for [YOUR PRODUCT/SERVICE].
+
+Requirements:
+- Use Next.js 14 with the App Router
+- Tailwind CSS for styling
+- Framer Motion for all animations (scroll reveals, hover states, page transitions)
+- Pull hero, features, and pricing sections from 21st.dev components (via the Magic MCP /ui command)
+- Follow the design tokens defined in our frontend-design skill
+- Add: a sticky navbar, a hero with headline + CTA, 3 feature cards, social proof
+  section, pricing, FAQ, and footer
+- Mobile-first, fully responsive
+- Lighthouse score 90+ on performance
+
+Start by setting up the project structure, then build section by section.
+Show me each section before moving to the next.
+
+COMMON MISTAKES TO AVOID (baked into this prompt):
+- Don't skip the design skill (→ generic AI look)
+- Be specific about sections/animations/content (vague prompts = vague output)
+- Iterate: first output is rarely final — refine spacing, contrast, motion
+- Always finish with lazy-loaded images, optimized fonts, and a Lighthouse audit</div>
+  </div>
+  <div class="co co-or"><span class="ci">💵</span><div><strong>What this saves vs traditional:</strong> Hire a web designer = $5K–$15K / 4–8 weeks. Hire an agency = $10K–$30K / 6–12 weeks. Claude Code + this stack = ~$20/mo / 1–3 days. That's the entire value proposition you're selling clients.</div></div>
+</section>
+
+<!-- ═══════════════ BONUS: AI SETTER ═══════════════ -->
+<section class="sec" id="ai-setter">
+  <div class="sh"><div class="si i-cy">💬</div><h2 class="st">Bonus — Add an AI Setter (Sell the Site + Book Calls on Autopilot)</h2></div>
+  <div class="co co-cy"><span class="ci">🤖</span><div>Once you're building sites for clients, offer this as an upsell: an <strong>AI DM setter</strong> that turns their Instagram into a 24/7 lead machine — qualifies leads, handles objections, books calls. Responds in under 3 seconds, works 24/7, costs cents per conversation vs $300–600/mo for a human setter. Great recurring add-on to a website deal.</div></div>
+  <div class="tw"><table>
+    <thead><tr><th>Step</th><th>Action</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Create ManyChat account, connect Instagram Business/Creator (linked to a Facebook Page)</td><td>manychat.com (free to start)</td></tr>
+      <tr><td>2</td><td>Generate a Claude API key (pay-per-use, ~$0.05 per full qualification conversation)</td><td>console.anthropic.com</td></tr>
+      <tr><td>3</td><td>Connect Claude in ManyChat → Settings → Integrations → paste API key</td><td>ManyChat</td></tr>
+      <tr><td>4</td><td>New Automation → trigger: "User comments on Post/Reel" with a keyword</td><td>ManyChat Automation tab</td></tr>
+      <tr><td>5</td><td>Add public reply (3–4 variations) + private DM via Claude Action block</td><td>ManyChat</td></tr>
+      <tr><td>6</td><td>Write the prompt: voice/tone, offer, qualification flow, objection handling, CTA</td><td>The prompt is the magic</td></tr>
+      <tr><td>7</td><td>Set live, test with the keyword, have 3–4 friends test + refine</td><td>Launch</td></tr>
+    </tbody>
+  </table></div>
+  <div class="co co-gn"><span class="ci">💡</span><div><strong>The prompt trick:</strong> paste the client's best real DM conversations into the prompt — including the exact words they use when a lead says "I can't afford it" or "I need to think about it." Claude learns their patterns and replicates them with scary accuracy. Cost: ManyChat free tier + ~$10–20/mo Claude API vs $300–600/mo human setter (~95% cheaper).</div></div>
+</section>
+
+<!-- ═══════════════ CHECKLIST ═══════════════ -->
+<section class="sec" id="master-checklist">
+  <div class="sh"><div class="si i-gn">✅</div><h2 class="st">Master Checklist — Every Build, Start to Ship</h2></div>
+  <div class="g2">
+    <div class="card c-pu">
+      <div class="ct">One-Time (Machine Setup)</div>
+      <div class="cd">☐ Node, Python, Git installed<br>☐ python3 alias fix (Windows)<br>☐ Claude Code CLI<br>☐ UI/UX Pro Max global<br>☐ emilkowalski/skill global<br>☐ supermemory installed<br>☐ Firecrawl CLI + API key<br>☐ Perfect Web Clone in ~/.claude/skills<br>☐ MCPs in settings.json (magic, context7, playwright, desktop-commander, firecrawl, higgsfield, serena)</div>
+    </div>
+    <div class="card c-or">
+      <div class="ct">Per Project (Setup)</div>
+      <div class="cd">☐ Make [client]-website folder + assets/<br>☐ Firecrawl their site → assets/ (Path A/B)<br>☐ OR drop client-provided assets in<br>☐ Save 3 reference screenshots to assets/references<br>☐ Scaffold (Vite/Next) + install deps<br>☐ claude mcp add magic<br>☐ git init + push to GitHub<br>☐ code . && claude</div>
+    </div>
+    <div class="card c-cy">
+      <div class="ct">Build</div>
+      <div class="cd">☐ Run orchestration setup prompt (planner writes BUILD_SPEC.md)<br>☐ Paste the right master prompt (A/B/C/D)<br>☐ Dispatch Sonnet workers task by task<br>☐ Planner reviews each (PASS/FIX)<br>☐ Animation polish pass<br>☐ 21st.dev component upgrades via /ui<br>☐ Higgsfield images if needed</div>
+    </div>
+    <div class="card c-gn">
+      <div class="ct">Ship</div>
+      <div class="cd">☐ sanyuan-skills code review pass<br>☐ agent-browser auto-QA<br>☐ npm run build (zero errors)<br>☐ Test mobile at 375px<br>☐ All phone #s are tel: links<br>☐ No lorem ipsum anywhere<br>☐ git push → Vercel deploys<br>☐ Set custom preview URL<br>☐ Send the link</div>
+    </div>
+  </div>
+
+  <div class="co co-or" style="margin-top:20px">
+    <span class="ci">🏆</span>
+    <div><strong>The whole machine in one line:</strong> Firecrawl their assets → planner writes the spec → cheap Sonnet workers build it with your skills + animations → planner reviews → polish → QA → Vercel → send link. Rinse and repeat for roofing, plumbing, barbers, restaurants — same machine, swap the industry variable.</div>
+  </div>
+</section>
+
+</main>
+
+<script>
+function cid(id,btnId){var el=document.getElementById(id),btn=document.getElementById(btnId);if(!el||!btn)return;var t=el.textContent||el.innerText||'',o=btn.textContent;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t.trim()).then(function(){btn.textContent='✅ Copied!';var bg=btn.style.background;btn.dataset.bg=bg;setTimeout(function(){btn.textContent=o},3000)}).catch(function(){fb(t,btn,o)})}else{fb(t,btn,o)}}
+function cc(btn){var block=btn.closest('.cb').querySelector('.cbody');if(!block)return;var t=block.textContent||block.innerText||'',o=btn.textContent;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t.trim()).then(function(){btn.textContent='Copied!';btn.style.color='#4ade80';setTimeout(function(){btn.textContent=o;btn.style.color=''},2000)}).catch(function(){fb(t,btn,o)})}else{fb(t,btn,o)}}
+function fb(t,btn,o){var ta=document.createElement('textarea');ta.value=t.trim();ta.style.cssText='position:fixed;top:-9999px;opacity:0';document.body.appendChild(ta);ta.focus();ta.select();try{if(document.execCommand('copy')){btn.textContent='✅ Copied!';setTimeout(function(){btn.textContent=o},3000)}}catch(e){alert('Please copy manually.')}document.body.removeChild(ta)}
+</script>
+</body>
+</html>
