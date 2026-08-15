@@ -147,6 +147,11 @@ class JarvisChatResponse(BaseModel):
 class JarvisOutboundCallRequest(BaseModel):
     to: str | None = None
 
+class JarvisNotifyRequest(BaseModel):
+    message: str
+    urgent: bool = False
+    call_to: str | None = None
+
 class JarvisConnectorTaskRequest(BaseModel):
     tool: str
     arguments: dict = {}
@@ -894,6 +899,7 @@ Use Gmail system labels: remove INBOX to archive, remove UNREAD to mark read, ad
 {"tool":"gmail_create_label","arguments":{"name":"label name"}}
 {"tool":"slack_send_message","arguments":{"channel_id":"optional configured default","message":"complete message"}}
 {"tool":"twilio_send_sms","arguments":{"to":"E.164 allowlisted number","message":"complete message"}}
+{"tool":"twilio_place_call","arguments":{"to":"E.164 allowlisted number, or omit to call Dan's default number"}}
 If a required recipient, message id, draft id, phone number, subject, or content is missing, return {"tool":"none","missing":"specific missing information"}.
 Never invent identifiers or recipients. Draft means create a draft, never send. Delete email means move to Trash, never permanently delete. Preserve Dan's intended content and do not add claims."""
 
@@ -960,6 +966,7 @@ async def _maybe_local_tool(message: str, channel: str) -> str | None:
         (any(term in lower for term in ("email", "gmail", "inbox")) and any(term in lower for term in ("draft", "send draft", "archive", "mark read", "star", "label", "trash", "delete")))
         or ("slack" in lower and any(term in lower for term in ("send", "post", "message", "tell")))
         or (any(term in lower for term in ("text me", "send me a text", "send sms", "sms me")))
+        or (any(term in lower for term in ("call me", "call my phone", "give me a call", "phone me")))
     )
     if cloud_action:
         explicit_draft = re.search(
@@ -978,7 +985,7 @@ async def _maybe_local_tool(message: str, channel: str) -> str | None:
         except JarvisProvidersUnavailable:
             return "I can prepare that action, but a reasoning provider is required to translate it safely."
         tool = str(plan.get("tool", "")); arguments = plan.get("arguments") if isinstance(plan.get("arguments"), dict) else {}
-        allowed = {"gmail_create_draft", "gmail_send_draft", "gmail_modify_message", "gmail_trash_message", "gmail_create_label", "slack_send_message", "twilio_send_sms"}
+        allowed = {"gmail_create_draft", "gmail_send_draft", "gmail_modify_message", "gmail_trash_message", "gmail_create_label", "slack_send_message", "twilio_send_sms", "twilio_place_call"}
         if tool not in allowed:
             return f"I need one detail before I can prepare that action: {plan.get('missing') or 'the exact recipient or item identifier'}."
         safe_preview = json.dumps(arguments, default=str)
@@ -1572,6 +1579,24 @@ async def jarvis_outbound_call(req: JarvisOutboundCallRequest):
         response = await client.post(f"https://api.twilio.com/2010-04-01/Accounts/{sid}/Calls.json", auth=(sid, token), data={"To": destination, "From": number, "Url": twiml_url, "Method": "POST"})
         response.raise_for_status()
     return {"status": "calling", "call_sid": response.json().get("sid")}
+
+
+@app.post("/jarvis/notify", dependencies=[Depends(require_key)])
+async def jarvis_notify(req: JarvisNotifyRequest):
+    """Single entry point for local scripts (reply monitor, scrapers, watchdog, etc.) to
+    proactively reach Dan. Slack always fires; a call only fires when urgent=True, per
+    Dan's stated preference of Slack-first, calls reserved for things that can't wait."""
+    result: dict = {"slack": None, "call": None}
+    try:
+        result["slack"] = await execute_write_tool("slack_send_message", {"message": req.message})
+    except IntegrationUnavailable as exc:
+        result["slack"] = {"error": str(exc)}
+    if req.urgent:
+        try:
+            result["call"] = await execute_write_tool("twilio_place_call", {"to": req.call_to} if req.call_to else {})
+        except IntegrationUnavailable as exc:
+            result["call"] = {"error": str(exc)}
+    return result
 
 
 # Outbound-polling bridge. The PC calls Railway; Railway never opens a port on the PC.

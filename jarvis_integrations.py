@@ -400,6 +400,22 @@ async def twilio_send_sms(arguments: dict) -> dict:
     payload = response.json(); return {"sent": True, "message_sid": payload.get("sid"), "status": payload.get("status"), "to": destination}
 
 
+async def twilio_place_call(arguments: dict) -> dict:
+    """Place an outbound call that connects to the live Jarvis phone conversation loop (/jarvis/phone/twiml)."""
+    sid, auth, sender = os.getenv("TWILIO_ACCOUNT_SID", ""), os.getenv("TWILIO_AUTH_TOKEN", ""), os.getenv("TWILIO_NUMBER", "")
+    destination = str(arguments.get("to", "")).strip() or os.getenv("DAN_PHONE_NUMBER", "")
+    allowed = {item.strip() for item in os.getenv("JARVIS_ALLOWED_CALLERS", "").split(",") if item.strip()}
+    public_url = os.getenv("JARVIS_PUBLIC_URL", "").rstrip("/")
+    if not sid or not auth or not sender or not public_url or destination not in allowed:
+        raise IntegrationUnavailable("Twilio outbound calling is not fully configured or destination is not allowlisted")
+    response = await _request_with_retry(
+        "POST", f"https://api.twilio.com/2010-04-01/Accounts/{sid}/Calls.json", auth=(sid, auth),
+        data={"To": destination, "From": sender, "Url": f"{public_url}/jarvis/phone/twiml", "Method": "POST"},
+    )
+    payload = response.json()
+    return {"status": "calling", "call_sid": payload.get("sid"), "to": destination}
+
+
 async def gmail_inbox_triage(limit: int = 25) -> dict:
     """Classify unread metadata/snippets; it does not mutate the mailbox."""
     result = await gmail_search("is:unread newer_than:30d", limit)
@@ -515,6 +531,7 @@ WRITE_TOOLS = {
     "gmail_create_label": gmail_create_label,
     "slack_send_message": slack_send_message,
     "twilio_send_sms": twilio_send_sms,
+    "twilio_place_call": twilio_place_call,
 }
 
 
